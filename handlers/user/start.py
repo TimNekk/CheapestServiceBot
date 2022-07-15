@@ -12,7 +12,7 @@ from loader import dp, db
 @dp.message_handler(IsInDB(reverse=True), CommandStart(), state='*')
 async def start_unknown(message: types.Message, state: FSMContext):
     try:
-        db.add_user(message.chat.id, message.from_user.username, message.from_user.first_name, message.from_user.last_name)
+        db.add_user(message.chat.id, message.chat.username, message.chat.first_name, message.chat.last_name)
     except IntegrityError:
         pass
 
