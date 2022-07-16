@@ -82,7 +82,7 @@ async def wait_for_code(working_number: Number, call: types.CallbackQuery) -> No
 
     if not code:
         working_number.set_busy(False)
-        await user.send_message(call.message.message_id, "Время на активацию истекло")
+        await user.send_message("Время на активацию истекло")
         return
 
     text = f"""
