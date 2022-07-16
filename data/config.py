@@ -31,7 +31,7 @@ class CommandInfo:
 @dataclass
 class Commands:
     buy = CommandInfo("buy", "Купить")
-    guide = CommandInfo("guide", "Инструкция по применению")
+    guide = CommandInfo("guide", "Инструкции по применению")
     support = CommandInfo("support", "Поддержка")
     feedback = CommandInfo("feedback", "Отзывы")
 
