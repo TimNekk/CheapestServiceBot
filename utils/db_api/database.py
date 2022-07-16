@@ -86,7 +86,7 @@ class Database:
     # -----------------------------------------------------------------
 
     def add_service(self, name: str, code: str, guide: str, show: bool = True) -> Service:
-        sql = 'INSERT INTO Services (name, code, guide, show, "order") VALUES (?, ?, ?, ?, (SELECT MAX("order") + 1 FROM Services))'
+        sql = 'INSERT INTO Services (name, code, guide, show, "order") VALUES (?, ?, ?, ?, (SELECT COALESCE(MAX("order") + 1, 1) FROM Services))'
         self.execute(sql, parameters=(name, code, guide, show), commit=True)
         return self._get_service_by_name(name)
 
@@ -125,7 +125,7 @@ class Database:
 
     def add_category(self, service_id: int, name: str, price: int, description: Optional[str] = None, show: bool = True) -> Category:
         sql = 'INSERT INTO Categories(service_id, name, price, show, description, "order") VALUES(?, ?, ?, ?, ?,' \
-              ' (SELECT MAX("order") + 1 FROM Categories WHERE service_id = ?))'
+              ' (SELECT COALESCE(MAX("order") + 1, 1) FROM Categories WHERE service_id = ?))'
         self.execute(sql, parameters=(service_id, name, price, show, description, service_id), commit=True)
         return self.get_category(service_id)
 
