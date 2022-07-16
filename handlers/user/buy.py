@@ -65,14 +65,14 @@ async def categories_callback(call: types.CallbackQuery, state: FSMContext, call
     if category.description:
         text += f"""
 🧾 <b>Описание:</b> 
-{category.description}₽
+{category.description}
 
 """
 
     text += f"""
 🗃 <b>Осталось:</b> {category.get_number_count()} шт.
 
-💵 <b>Цена:</b> {category.price}
+💵 <b>Цена:</b> {category.price}₽
 """
 
     await user.edit_message_text(call.message.message_id, text, reply_markup=category_keyboard(category.id))
