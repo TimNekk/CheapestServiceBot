@@ -58,20 +58,21 @@ async def categories_callback(call: types.CallbackQuery, state: FSMContext, call
         return
 
     text = f"""
-📦 <b>Товар:</b> {category.name}
+🛒 <b>Товар:</b> {category.name}
 
 """
 
     if category.description:
         text += f"""
-📋 <b>Описание:</b> {category.description}
+🧾 <b>Описание:</b> 
+{category.description}₽
 
 """
 
     text += f"""
-🗃 <b>Осталось:</b> {category.get_number_count()}
+🗃 <b>Осталось:</b> {category.get_number_count()} шт.
 
-💰 <b>Цена:</b> {category.price}
+💵 <b>Цена:</b> {category.price}
 """
 
     await user.edit_message_text(call.message.message_id, text, reply_markup=category_keyboard(category.id))
@@ -88,9 +89,9 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
 ➖➖➖➖➖➖➖➖➖➖➖
 Для оплаты перейдите по ссылке!
 ➖➖➖➖➖➖➖➖➖➖➖
-💰 <b>Сумма:</b> {category.price}
+💵 <b>Сумма:</b> {category.price}₽
 ⏰ <b>Время на оплату:</b> 60 минут
-🕜 <b>Необходимо оплатить до</b> {(datetime.utcnow() + timedelta(days=1)).strftime("%H:%M:%S")} МСК
+🕜 <b>Необходимо оплатить до</b> {(datetime.utcnow() + timedelta(hours=4)).strftime("%H:%M:%S")} МСК
 """
 
     payment: Payment = QiwiPayment(category.price, description=category.name)
