@@ -1,3 +1,5 @@
+from sqlite3 import IntegrityError
+
 import validators
 
 from aiogram import types
@@ -217,7 +219,11 @@ async def service_add_handler(message: types.Message, state: FSMContext):
         await send_error("Неверная ссылка на телеграф!")
         return
 
-    db.add_service(name, code, guide_url)
+    try:
+        db.add_service(name, code, guide_url)
+    except IntegrityError as e:
+        await send_error(f"Ошибка добавлния в Базу Данных: {e}")
+        return
 
     await state.finish()
     await show_services(ask_message)

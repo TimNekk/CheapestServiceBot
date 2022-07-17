@@ -1,3 +1,4 @@
+from sqlite3 import IntegrityError
 from typing import Optional
 
 import validators
@@ -227,7 +228,12 @@ async def category_add_handler(message: types.Message, state: FSMContext):
         name, price, description = split_message
 
     service_id = (await state.get_data()).get("service_id")
-    db.add_category(service_id, name, price, description)
+
+    try:
+        db.add_category(service_id, name, price, description)
+    except IntegrityError as e:
+        await send_error(f"Ошибка добавлния в Базу Данных: {e}")
+        return
 
     await state.finish()
     await show_categories(ask_message, service_id)

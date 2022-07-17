@@ -1,3 +1,5 @@
+from sqlite3 import IntegrityError
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hcode
@@ -170,7 +172,11 @@ async def number_add_handler(message: types.Message, state: FSMContext):
     # TODO: Проверка на валидность значения
 
     category_id = (await state.get_data()).get("category_id")
-    db.add_number(number_id, category_id, number)
+    try:
+        db.add_number(number_id, category_id, number)
+    except IntegrityError as e:
+        await send_error(f"Ошибка добавлния в Базу Данных: {e}")
+        return
 
     await state.finish()
     await show_numbers(ask_message, category_id)
