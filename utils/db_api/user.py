@@ -11,7 +11,7 @@ from aiogram.utils.exceptions import BotBlocked, ChatNotFound, BotKicked, UserDe
 @dataclass
 class User:
     id: int
-    username: str
+    username: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
     _banned: bool

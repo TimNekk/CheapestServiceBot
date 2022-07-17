@@ -51,7 +51,7 @@ class Database:
     # Users
     # -----------------------------------------------------------------
 
-    def add_user(self, id: int, username: str, first_name: Optional[str] = None, last_name: Optional[str] = None) -> User:
+    def add_user(self, id: int, username: Optional[str], first_name: Optional[str] = None, last_name: Optional[str] = None) -> User:
         sql = 'INSERT INTO Users(id, username, first_name, last_name) VALUES(?, ?, ?, ?)'
         self.execute(sql, parameters=(id, username, first_name, last_name), commit=True)
         return self.get_user(id)
