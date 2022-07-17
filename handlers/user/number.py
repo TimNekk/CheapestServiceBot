@@ -45,7 +45,7 @@ async def give_number(call: types.CallbackQuery, category_id: int):
 Пожалуйста, обратитесь к администратору {ADMIN_NICKNAME}
 """
         await user.send_message(text)
-        await notify_admins(f"<b>Нет номер из категории:<b> {category.service.name} - {category.name}")
+        await notify_admins(f"<b>Нет номер из категории:</b> {category.service.name} - {category.name}")
         return
 
     working_number.set_busy(True)
