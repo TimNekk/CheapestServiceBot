@@ -1,3 +1,4 @@
+import logging
 from sqlite3 import IntegrityError
 
 from aiogram import types
@@ -13,8 +14,9 @@ from loader import dp, db
 async def start_unknown(message: types.Message, state: FSMContext):
     try:
         db.add_user(message.chat.id, message.chat.username, message.chat.first_name, message.chat.last_name)
-    except IntegrityError:
-        pass
+    except IntegrityError as e:
+        logging.warning(e)
+        logging.warning(message)
 
     await start(message, state)
 
