@@ -1,5 +1,7 @@
+import validators
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
+from aiogram.utils.exceptions import InlineKeyboardExpected
 
 from loader import db
 
@@ -22,7 +24,8 @@ def services_keyboard(guides: bool = False) -> InlineKeyboardMarkup:
     services = db.get_all_services(show_only=True)
     for service in services:
         if guides:
-            keyboard.add(InlineKeyboardButton(text=service.name, url=service.guide_url))
+            if validators.url(service.guide_url):
+                keyboard.add(InlineKeyboardButton(text=service.name, url=service.guide_url))
         else:
             keyboard.add(InlineKeyboardButton(text=service.name, callback_data=make_services_callback_data(service.id)))
 
