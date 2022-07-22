@@ -3,7 +3,7 @@ import os
 import sqlite3
 import time
 import uuid
-from datetime import datetime, date, deltatime
+from datetime import datetime, date, timedelta
 from enum import Enum
 from shutil import copyfile, move
 from typing import Optional
@@ -78,7 +78,7 @@ class Database:
 
     def get_users_count_by_date(self, utc_date: date) -> int:
         utc_date = utc_date.strftime('%Y-%m-%d')
-        sql = f"SELECT COUNT(*) FROM Users WHERE DATETIME(join_datetime) > '{utc_date} 21:00:00' AND DATETIME(join_datetime) < '{utc_date + deltatime(days=1)} 21:00:00'"
+        sql = f"SELECT COUNT(*) FROM Users WHERE DATETIME(join_datetime) > '{utc_date} 21:00:00' AND DATETIME(join_datetime) < '{utc_date + timedelta(days=1)} 21:00:00'"
         return self.execute(sql, fetchone=True)[0]
 
     # -----------------------------------------------------------------
