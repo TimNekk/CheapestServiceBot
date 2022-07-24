@@ -17,7 +17,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         self.prefix = key_prefix
         super(ThrottlingMiddleware, self).__init__()
 
-    async def on_process_message(self, message: types.Message, data: dict):
+    async def on_process_update(self, message: types.Message, data: dict):
         handler = current_handler.get()
         dispatcher = Dispatcher.get_current()
         if handler:
@@ -29,7 +29,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         try:
             await dispatcher.throttle(key, rate=limit)
         except Throttled as t:
-            # await self.message_throttled(message, t)
+            await self.message_throttled(message, t)
             raise CancelHandler()
 
     async def message_throttled(self, message: types.Message, throttled: Throttled):
