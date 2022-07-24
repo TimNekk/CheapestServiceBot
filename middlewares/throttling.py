@@ -6,6 +6,8 @@ from aiogram.dispatcher.handler import CancelHandler, current_handler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.utils.exceptions import Throttled
 
+from data.config import ANTI_FLOOD_USERS
+
 
 class ThrottlingMiddleware(BaseMiddleware):
     """
@@ -18,8 +20,9 @@ class ThrottlingMiddleware(BaseMiddleware):
         super(ThrottlingMiddleware, self).__init__()
 
     async def on_pre_process_update(self, update: types.Update, data: dict):
-        print(update)
-        print(data)
+        if update.message and update.message.message_id in ANTI_FLOOD_USERS:
+            print(update)
+            CancelHandler()
 
     async def on_process_message(self, message: types.Message, data: dict):
         handler = current_handler.get()
