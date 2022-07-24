@@ -17,6 +17,10 @@ class ThrottlingMiddleware(BaseMiddleware):
         self.prefix = key_prefix
         super(ThrottlingMiddleware, self).__init__()
 
+    async def on_pre_process_update(self, update: types.Update, data: dict):
+        print(update)
+        print(data)
+
     async def on_process_message(self, message: types.Message, data: dict):
         handler = current_handler.get()
         dispatcher = Dispatcher.get_current()
