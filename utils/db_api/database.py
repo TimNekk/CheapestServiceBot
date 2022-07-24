@@ -77,7 +77,7 @@ class Database:
         return self.execute(sql, fetchone=True)[0]
 
     def get_users_count_by_date(self, utc_date: date) -> int:
-        sql = f"SELECT COUNT(*) FROM Users WHERE DATETIME(join_datetime) > '{utc_date.strftime('%Y-%m-%d')} 21:00:00' AND DATETIME(join_datetime) < '{(utc_date + timedelta(days=1)).strftime('%Y-%m-%d')} 21:00:00'"
+        sql = f"SELECT COUNT(*) FROM Users WHERE DATETIME(join_datetime) > '{(utc_date - timedelta(days=1)).strftime('%Y-%m-%d')} 21:00:00' AND DATETIME(join_datetime) < '{utc_date.strftime('%Y-%m-%d')} 21:00:00'"
         return self.execute(sql, fetchone=True)[0]
 
     # -----------------------------------------------------------------
