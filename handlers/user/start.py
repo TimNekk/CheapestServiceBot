@@ -4,6 +4,7 @@ from sqlite3 import IntegrityError
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.builtin import CommandStart
+from aiogram.utils.exceptions import RetryAfter
 
 from filters import IsInDB
 from keyboards.default import menu_keyboard
@@ -30,4 +31,7 @@ async def start(message: types.Message, state: FSMContext):
 Добро пожаловать, {user.first_name} {user.last_name if user.last_name else ''}
 """
 
-    await user.send_message(text, reply_markup=menu_keyboard())
+    try:
+        await user.send_message(text, reply_markup=menu_keyboard())
+    except RetryAfter:
+        pass
