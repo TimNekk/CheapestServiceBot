@@ -26,8 +26,12 @@ class ThrottlingMiddleware(BaseMiddleware):
                 raise CancelHandler()
             else:
                 print(f"NOT STOPPED {update.message.chat.id}")
-        else:
-            print(f"NOT MESSAGE {update}")
+        if update.callback_query:
+            if update.callback_query.message.chat.id in ANTI_FLOOD_USERS:
+                print(f"STOPPED {update.callback_query.message.chat.id}")
+                raise CancelHandler()
+            else:
+                print(f"NOT STOPPED {update.callback_query.message.chat.id}")
 
     async def on_process_message(self, message: types.Message, data: dict):
         handler = current_handler.get()
