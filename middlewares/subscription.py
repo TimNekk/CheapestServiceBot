@@ -33,5 +33,6 @@ class SubscriptionMiddleware(BaseMiddleware):
                 await message.answer(text, reply_markup=subscribe_keyboard())
                 raise CancelHandler()
             except RetryAfter:
+                print(message.chat.id)
                 CancelHandler()
 
