@@ -4,6 +4,7 @@ from aiogram import Dispatcher
 from aiogram.dispatcher.handler import current_handler, CancelHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
+from aiogram.utils.exceptions import RetryAfter
 
 from data.config import Subscription
 from keyboards.inline import subscribe_keyboard
@@ -24,10 +25,13 @@ class SubscriptionMiddleware(BaseMiddleware):
         if check_user.status not in ['creator', 'administrator', 'member']:
             text = "Для продолжения подпишитесь на канал"
 
-            if message.reply_markup == subscribe_keyboard():
-                await call.answer(text)
-                raise CancelHandler()
+            try:
+                if message.reply_markup == subscribe_keyboard():
+                    await call.answer(text)
+                    raise CancelHandler()
 
-            await message.answer(text, reply_markup=subscribe_keyboard())
-            raise CancelHandler()
+                await message.answer(text, reply_markup=subscribe_keyboard())
+                raise CancelHandler()
+            except RetryAfter:
+                CancelHandler()
 
