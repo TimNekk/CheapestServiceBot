@@ -20,12 +20,11 @@ class ThrottlingMiddleware(BaseMiddleware):
         super(ThrottlingMiddleware, self).__init__()
 
     async def on_pre_process_update(self, update: types.Update, data: dict):
-        if update.message:
-            if update.message.message_id in ANTI_FLOOD_USERS:
-                print("STOPPED")
-                CancelHandler()
-            else:
-                print("NOT STOPPED")
+        if update.message.chat.id in ANTI_FLOOD_USERS:
+            print("STOPPED")
+            CancelHandler()
+        else:
+            print("NOT STOPPED")
 
     async def on_process_message(self, message: types.Message, data: dict):
         handler = current_handler.get()
