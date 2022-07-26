@@ -61,6 +61,14 @@ async def give_number(call: types.CallbackQuery, category_id: int):
     await call.message.delete()
     await user.send_message(text)
 
+    await asyncio.sleep(5)
+    text = f"""
+Если в течение 1 минуты вам не придёт код, <b>переустановите приложение и отключитесь от вай фай, и введите заново этот номер.</b>
+
+<i>Если проблема не решится, пишите нам в поддержку.</i>
+"""
+    await user.send_message(text)
+
     await wait_for_code(working_number, call)
 
 
