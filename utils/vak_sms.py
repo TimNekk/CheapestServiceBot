@@ -82,13 +82,3 @@ class VakSMSApi:
         data["status"] = status.value
 
         requests.get(self.SET_STATUS_URL, params=data)
-
-
-if __name__ == "__main__":
-    api = VakSMSApi("b8eff7373ed140fb8df771dcc174944f")
-    # api.set_status("1657802063321838", Status.RESEND)
-    print(api.get_code("1657804225303083"))
-    # 165780003933985
-    # 165780003933985
-    # 1657802063321838
-    # print(api.prolong_number("79060905721", "mv"))
