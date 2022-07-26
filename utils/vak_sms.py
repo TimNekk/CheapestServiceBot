@@ -1,7 +1,9 @@
 from enum import Enum
+from json import JSONDecodeError
 from typing import Union
 
 import requests
+from loguru import logger
 
 
 class ApiKeyNotFound(Exception):
@@ -69,7 +71,11 @@ class VakSMSApi:
         data["tel"] = str(number)
 
         response = requests.get(self.PROLONG_URL, params=data)
-        response_json: dict = response.json()
+        try:
+            response_json: dict = response.json()
+        except JSONDecodeError:
+            logger.error(f"VakSMS API prolog response: {response.status_code} {response.text}")
+            raise NoNumber()
 
         if response_json.get("error") == "noNumber":
             raise NoNumber()
