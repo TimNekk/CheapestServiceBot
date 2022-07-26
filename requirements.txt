@@ -3,3 +3,4 @@ environs~=8.0.0
 pypayment>=1.2.4
 validators
 aiogram_broadcaster
+loguru

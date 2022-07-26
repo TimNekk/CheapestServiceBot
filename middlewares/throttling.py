@@ -20,18 +20,9 @@ class ThrottlingMiddleware(BaseMiddleware):
         super(ThrottlingMiddleware, self).__init__()
 
     async def on_pre_process_update(self, update: types.Update, data: dict):
-        if update.message:
-            if update.message.chat.id in ANTI_FLOOD_USERS:
-                print(f"STOPPED {update.message.chat.id}")
-                raise CancelHandler()
-            else:
-                print(f"NOT STOPPED {update.message.chat.id}")
-        if update.callback_query:
-            if update.callback_query.message.chat.id in ANTI_FLOOD_USERS:
-                print(f"STOPPED {update.callback_query.message.chat.id}")
-                raise CancelHandler()
-            else:
-                print(f"NOT STOPPED {update.callback_query.message.chat.id}")
+        if (update.message and update.message.chat.id in ANTI_FLOOD_USERS) \
+                or (update.callback_query and update.callback_query.message.chat.id in ANTI_FLOOD_USERS):
+            raise CancelHandler()
 
     async def on_process_message(self, message: types.Message, data: dict):
         handler = current_handler.get()

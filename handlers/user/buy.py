@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.utils.markdown import hcode
+from loguru import logger
 from pypayment import Payment, QiwiPayment, PaymentStatus
 
 from data.config import ADMIN_NICKNAME
@@ -84,6 +86,7 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
 
     category_id: int = callback_data.get("category_id")
     category = db.get_category(category_id)
+    payment: Payment = QiwiPayment(category.price, description=category.name)
 
     text = f"""
 ➖➖➖➖➖➖➖➖➖➖➖
@@ -92,9 +95,10 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
 💵 <b>Сумма:</b> {category.price}₽
 ⏰ <b>Время на оплату:</b> 60 минут
 🕜 <b>Необходимо оплатить до</b> {(datetime.utcnow() + timedelta(hours=4)).strftime("%H:%M:%S")} МСК
+🆔 <b>ID платежа:</b> {hcode(payment.id)}
 """
 
-    payment: Payment = QiwiPayment(category.price, description=category.name)
+    logger.debug(f"{user.id} получил ссылку на оплату {category.name} - {category.price}₽ ({payment.id})")
 
     await state.set_state('payment')
     await state.update_data(payment=payment,
@@ -106,6 +110,13 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
 
 @dp.callback_query_handler(buy_callback_data.filter(action="cancel"), state="payment")
 async def buy_cancel_callback(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
+    user = db.get_user(call.message.chat.id)
+    category_id: int = (await state.get_data()).get("category_id")
+    category = db.get_category(category_id)
+    payment: Payment = (await state.get_data()).get("payment")
+
+    logger.debug(f"{user.id} отменил оплату {category.name} - {category.price}₽ ({payment.id})")
+
     await state.finish()
     await categories_callback(call, state, callback_data)
 
@@ -136,6 +147,7 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
 <b>Новая продажа:</b> {category.service.name} - {category.name}
 <b>Сумма:</b> {payment.amount}₽
 <b>Пользователь:</b> {await user.link}
+<b>ID платежа:</b> {hcode(payment.id)}
 """
     await notify_admins(text)
 
