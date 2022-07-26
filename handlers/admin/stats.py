@@ -11,7 +11,7 @@ from loader import dp, db
 async def stats(message: types.Message):
     user = db.get_user(message.chat.id)
 
-    today_users_count = db.get_users_count_by_date(datetime.utcnow())
+    today_users_count = db.get_users_count_by_date(datetime.utcnow() + timedelta(hours=3))
     total_users_count = db.get_users_count()
 
     text = f"""
