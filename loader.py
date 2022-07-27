@@ -2,9 +2,9 @@ from datetime import timedelta
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from pypayment import QiwiPayment
+from pypayment import LavaPayment
 
-from data.config import Qiwi, BOT_TOKEN, VAK_SMS_API_KEY
+from data.config import Lava, BOT_TOKEN, VAK_SMS_API_KEY
 from utils import VakSMSApi
 from utils.db_api.database import Database
 
@@ -15,6 +15,7 @@ db = Database()
 
 vak_sms = VakSMSApi(VAK_SMS_API_KEY)
 
-QiwiPayment.authorize(secret_key=Qiwi.secret_key,
-                      theme_code=Qiwi.theme_code,
-                      expiration_duration=timedelta(hours=1))
+LavaPayment.authorize(token=Lava.token,
+                      wallet_to=Lava.wallet,
+                      expiration_duration=timedelta(hours=1),
+                      success_url=f"https://t.me/{(await bot.me).username}")
