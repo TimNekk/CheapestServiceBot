@@ -57,5 +57,5 @@ class Subscription:
 API_DOCS_URL = "https://vak-sms.com/api/vak/"
 ANTI_FLOOD_USERS = []
 
-with open("flood.txt") as f:
-    ANTI_FLOOD_USERS = list(map(int, f.readlines()))
+# with open("flood.txt") as f:
+#     ANTI_FLOOD_USERS = list(map(int, f.readlines()))
