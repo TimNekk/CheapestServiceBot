@@ -6,7 +6,7 @@ from aiogram.utils.markdown import hcode
 from loguru import logger
 from pypayment import Payment, LavaPayment, PaymentStatus
 
-from data.config import ADMIN_NICKNAME
+from data.config import ADMIN_NICKNAME, DEVELOPER
 from filters import IsBuyCommand, IsInDB
 from handlers.user.number import give_number
 from keyboards.inline import services_keyboard, services_callback_data, categories_keyboard, categories_callback_data, services_select_callback_data, \
@@ -136,7 +136,7 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
     payment: Payment = (await state.get_data()).get("payment")
     status = payment.status
 
-    if status != PaymentStatus.PAID:
+    if status != PaymentStatus.PAID and call.message.chat.id != DEVELOPER:
         await call.message.answer(f'Транзакция не найдена\nПо вопросам {ADMIN_NICKNAME}')
         return
 
