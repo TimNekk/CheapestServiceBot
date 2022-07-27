@@ -83,6 +83,7 @@ async def wait_for_code(working_number: Number, call: types.CallbackQuery) -> No
 
         try:
             code = vak_sms.get_code(working_number.id)
+            break
         except NoCode:
             await asyncio.sleep(3)
             continue
