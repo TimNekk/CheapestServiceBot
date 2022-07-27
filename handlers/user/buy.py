@@ -4,7 +4,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hcode
 from loguru import logger
-from pypayment import Payment, QiwiPayment, PaymentStatus
+from pypayment import Payment, LavaPayment, PaymentStatus
 
 from data.config import ADMIN_NICKNAME
 from filters import IsBuyCommand, IsInDB
@@ -86,7 +86,7 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
 
     category_id: int = callback_data.get("category_id")
     category = db.get_category(category_id)
-    payment: Payment = QiwiPayment(category.price, description=category.name)
+    payment: Payment = LavaPayment(category.price, description=category.name)
 
     text = f"""
 ➖➖➖➖➖➖➖➖➖➖➖
