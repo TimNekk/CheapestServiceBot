@@ -23,6 +23,12 @@ class Qiwi:
 
 
 @dataclass
+class Lava:
+    token: str = env.str("LAVA_TOKEN")
+    wallet: str = env.str("LAVA_WALLET")
+
+
+@dataclass
 class CommandInfo:
     command: str
     description: str
