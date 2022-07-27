@@ -18,4 +18,4 @@ vak_sms = VakSMSApi(VAK_SMS_API_KEY)
 LavaPayment.authorize(token=Lava.token,
                       wallet_to=Lava.wallet,
                       expiration_duration=timedelta(hours=1),
-                      success_url=f"https://t.me/{(await bot.me).username}")
+                      success_url=f"https://t.me/CheapestServiceBot")
