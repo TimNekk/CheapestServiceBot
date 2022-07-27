@@ -78,9 +78,10 @@ async def wait_for_code(working_number: Number, call: types.CallbackQuery) -> No
     give_time = datetime.utcnow()
     code: Optional[str] = None
     while give_time + timedelta(minutes=20) > datetime.utcnow():
+        if db.get_number(working_number.id) is None:
+            return
         try:
             code = vak_sms.get_code(working_number.id)
-            break
         except NoCode:
             await asyncio.sleep(3)
             continue
@@ -88,7 +89,7 @@ async def wait_for_code(working_number: Number, call: types.CallbackQuery) -> No
             working_number.prolong()
             continue
 
-    if not code:
+    if not code and working_number:
         working_number.set_busy(False)
         await user.send_message("Время на активацию истекло")
         return

@@ -16,9 +16,9 @@ def numbers_keyboard(category_id: int):
     keyboard = InlineKeyboardMarkup(row_width=5)
 
     category = db.get_category(category_id)
-    for number in category.get_numbers():
+    for number in category.get_numbers(not_busy=False):
         keyboard.add(
-            InlineKeyboardButton(text=number.phone_number,
+            InlineKeyboardButton(text="❗️" if number.busy else "" + number.phone_number,
                                  callback_data=make_numbers_callback_data(number.id, "edit")),
             InlineKeyboardButton(text="✏️",
                                  callback_data=make_numbers_callback_data(number.id, "edit")),

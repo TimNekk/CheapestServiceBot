@@ -33,6 +33,7 @@ async def number_edit(call: types.CallbackQuery, state: FSMContext, callback_dat
 
     text = f"""
 <b>Настройка номера:</b> {number.phone_number}
+{'❗️ Номер куплен пользователем ❗️' if number.busy else ''}
 
 <b>Номер:</b> {number.phone_number}
 <b>ID:</b> {number.id}
