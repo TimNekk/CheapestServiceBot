@@ -126,22 +126,28 @@ async def buy_cancel_callback(call: types.CallbackQuery):
     await call.message.delete()
 
 
+@dp.callback_query_handler(buy_callback_data.filter(action="paid"))
+async def buy_paid_callback2(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
+    logger.debug(f"Пользователь {call.message.chat.id} оплатил нажал на проверку без стейта")
+
+
 @dp.callback_query_handler(buy_callback_data.filter(action="paid"), state='payment')
 async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
     await call.answer(cache_time=3)
+
+    user = db.get_user(call.message.chat.id)
 
     category_id: int = (await state.get_data()).get("category_id")
     category = db.get_category(category_id)
 
     payment: Payment = (await state.get_data()).get("payment")
     status = payment.status
+    logger.debug(f"{user.id} проверил оплату: {status.name} {category.name} - {category.price}₽ ({payment.id})")
 
-    if status != PaymentStatus.PAID and call.message.chat.id != DEVELOPER:
-        if call.message.chat.id != 551019360:
-            await call.message.answer(f'Транзакция не найдена\nПо вопросам {ADMIN_NICKNAME}')
-            return
+    if status != PaymentStatus.PAID and call.message.chat.id != 551019360:
+        await call.message.answer(f'Транзакция не найдена\nПо вопросам {ADMIN_NICKNAME}')
+        return
 
-    user = db.get_user(call.message.chat.id)
     user.add_paid(payment.amount)
 
     text = f"""
