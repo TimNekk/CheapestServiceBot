@@ -33,6 +33,7 @@ class Redis:
     host: str = env.str("REDIS_HOST")
     port: int = env.int("REDIS_PORT")
     password: str = env.str("REDIS_PASS")
+    use_redis: bool = env.bool("USE_REDIS")
 
 
 @dataclass
