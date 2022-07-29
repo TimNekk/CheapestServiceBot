@@ -1,15 +1,15 @@
 from datetime import timedelta
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from pypayment import LavaPayment, ChargeCommission
 
-from data.config import Lava, BOT_TOKEN, VAK_SMS_API_KEY
+from data.config import Lava, BOT_TOKEN, VAK_SMS_API_KEY, Redis
 from utils import VakSMSApi
 from utils.db_api.database import Database
 
 bot = Bot(token=BOT_TOKEN, parse_mode=types.ParseMode.HTML)
-storage = MemoryStorage()
+storage = RedisStorage2(host=Redis.host, port=Redis.port, password=Redis.password)
 dp = Dispatcher(bot, storage=storage)
 db = Database()
 

@@ -12,3 +12,21 @@ services:
       - .env
     volumes:
       - .:/src
+    depends_on:
+      - redis
+    networks:
+      - tg_bot
+
+  redis:
+    container_name: "${REDIS_CONTAINER_NAME:-redis-container}"
+    image: redis:alpine
+    command: "redis-server --requirepass ${REDIS_PASS:-password123}"
+    restart: always
+    networks:
+      - tg_bot
+    volumes:
+      - ./redis:/data
+
+networks:
+  tg_bot:
+    driver: bridge

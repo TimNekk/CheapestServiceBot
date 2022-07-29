@@ -29,6 +29,13 @@ class Lava:
 
 
 @dataclass
+class Redis:
+    host: str = env.str("REDIS_HOST")
+    port: int = env.int("REDIS_PORT")
+    password: str = env.str("REDIS_PASS")
+
+
+@dataclass
 class CommandInfo:
     command: str
     description: str
