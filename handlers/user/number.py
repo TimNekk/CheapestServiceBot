@@ -7,6 +7,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hcode
 
 from data.config import ADMIN_NICKNAME
+from keyboards.inline.admin import delete_number_keyboard
 from loader import db, vak_sms
 from utils.db_api.number import Number
 from utils.notify_admins import notify_admins
@@ -37,7 +38,8 @@ async def give_number(call: types.CallbackQuery, category_id: int):
                 working_number = number.prolong()
                 break
             except NoNumber:
-                await notify_admins(f"Номер {number.phone_number} не работает")
+                await notify_admins(f"Номер {number.phone_number} не работает",
+                                    reply_markup=delete_number_keyboard(number.id))
 
     if not working_number:
         text = f"""

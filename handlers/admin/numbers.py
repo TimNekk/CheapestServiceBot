@@ -113,6 +113,12 @@ async def number_delete_confirm(call: types.CallbackQuery, state: FSMContext, ca
     number_id = callback_data.get("number_id")
     number = db.get_number(number_id)
     number.delete()
+
+    extra = callback_data.get("extra")
+    if extra == "stop":
+        await call.message.delete()
+        return
+
     await show_numbers(call.message, number.category_id)
 
 

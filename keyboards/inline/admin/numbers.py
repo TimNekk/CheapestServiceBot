@@ -66,3 +66,11 @@ def numbers_edit_keyboard(number_id: int):
     keyboard.add(InlineKeyboardButton(text="« Назад", callback_data=make_numbers_callback_data(number_id, "cancel")))
 
     return keyboard
+
+
+def delete_number_keyboard(number_id: int):
+    keyboard = InlineKeyboardMarkup()
+
+    keyboard.add(InlineKeyboardButton(text="Удалить", callback_data=make_numbers_callback_data(number_id, "delete_confirm", "stop")))
+
+    return keyboard
