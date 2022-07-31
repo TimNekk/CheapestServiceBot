@@ -42,9 +42,10 @@ async def check_broadcast(message: types.Message, state: FSMContext):
     broadcast_message = await message.send_copy(user.id)
     await message.delete()
 
-    await user.send_message("Все пользователям будет отправлено сообщение 👆", reply_markup=broadcast_accept_keyboard())
+    confirm_message = await user.send_message("Все пользователям будет отправлено сообщение 👆", reply_markup=broadcast_accept_keyboard())
 
     await state.update_data(broadcast_message=broadcast_message)
+    await state.update_data(confirm_message=confirm_message)
 
 
 @dp.callback_query_handler(broadcast_callback_data.filter(action='send'), state='broadcast_text')
@@ -53,7 +54,10 @@ async def start_broadcast(call: types.CallbackQuery, state: FSMContext):
 
     user = db.get_user(call.message.chat.id)
 
-    broadcast_message = (await state.get_data()).get('broadcast_message')
+    broadcast_message: types.Message = (await state.get_data()).get('broadcast_message')
+    confirm_message: types.Message = (await state.get_data()).get('confirm_message')
+
+    await confirm_message.delete_reply_markup()
 
     users_id = list(map(lambda u: u.id, db.get_all_users(without_ban=True)))
     await user.send_message(f'Рассылка на {len(users_id)} пользователей началась!')
