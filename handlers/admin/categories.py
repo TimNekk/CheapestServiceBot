@@ -1,3 +1,4 @@
+import pickle
 from sqlite3 import IntegrityError
 from typing import Optional
 
@@ -100,7 +101,7 @@ async def category_edit_attribute(call: types.CallbackQuery, state: FSMContext, 
     await state.set_state("category_edit_attribute")
     await state.update_data(extra=extra,
                             category_id=category_id,
-                            call=call)
+                            call=pickle.dumps(call))
 
     text = "<b>Отправьте значение</b>"
     await user.edit_message_text(call.message.message_id, text, reply_markup=categories_cancel_keyboard(category.id, back_text=True))
@@ -117,7 +118,7 @@ async def category_delete_confirm(call: types.CallbackQuery, state: FSMContext, 
 async def category_edit_attribute_handler(message: types.Message, state: FSMContext):
     await message.delete()
 
-    call: types.CallbackQuery = (await state.get_data()).get("call")
+    call: types.CallbackQuery = pickle.loads((await state.get_data()).get("call"))
     extra = (await state.get_data()).get("extra")
     category_id = (await state.get_data()).get("category_id")
     category = db.get_category(category_id)
@@ -190,7 +191,7 @@ async def category_add(call: types.CallbackQuery, state: FSMContext, callback_da
 
     service_id = callback_data.get("extra")
     await state.set_state("category_add")
-    await state.update_data(message=call.message,
+    await state.update_data(message=pickle.dumps(call.message),
                             service_id=service_id)
 
 
@@ -208,7 +209,7 @@ async def category_add_handler(message: types.Message, state: FSMContext):
 
     user = db.get_user(message.chat.id)
 
-    ask_message = (await state.get_data()).get("message")
+    ask_message = pickle.loads((await state.get_data()).get("message"))
     await message.delete()
 
     split_message = message.text.split("|")

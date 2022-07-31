@@ -104,7 +104,7 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
     await state.set_state('payment')
     await state.update_data(payment=pickle.dumps(payment),
                             category_id=category.id,
-                            message=call.message)
+                            message=pickle.dumps(call.message))
 
     await user.edit_message_text(call.message.message_id, text, reply_markup=buy_keyboard(category.id, payment.url))
 
@@ -165,8 +165,7 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
 
 @dp.message_handler(state='payment')
 async def notify_to_pay(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    payment_massage = data.get('message')
+    payment_massage = pickle.loads((await state.get_data()).get('message'))
     category_id = (await state.get_data()).get("category_id")
 
     await payment_massage.answer(

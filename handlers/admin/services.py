@@ -1,3 +1,4 @@
+import pickle
 from sqlite3 import IntegrityError
 
 import validators
@@ -100,7 +101,7 @@ async def service_edit_attribute(call: types.CallbackQuery, state: FSMContext, c
     await state.set_state("service_edit_attribute")
     await state.update_data(extra=extra,
                             service_id=service_id,
-                            call=call)
+                            call=pickle.dumps(call))
 
     text = "<b>Отправьте значение</b>"
     await user.edit_message_text(call.message.message_id, text, reply_markup=services_cancel_keyboard(service.id, back_text=True))
@@ -117,7 +118,7 @@ async def service_delete_confirm(call: types.CallbackQuery, state: FSMContext, c
 async def service_edit_attribute_handler(message: types.Message, state: FSMContext):
     await message.delete()
 
-    call: types.CallbackQuery = (await state.get_data()).get("call")
+    call: types.CallbackQuery = pickle.loads((await state.get_data()).get("call"))
     extra = (await state.get_data()).get("extra")
     service_id = (await state.get_data()).get("service_id")
     service = db.get_service(service_id)
@@ -187,7 +188,7 @@ async def service_add(call: types.CallbackQuery, state: FSMContext, callback_dat
     await user.edit_message_text(call.message.message_id, ADD_TEXT, reply_markup=services_cancel_keyboard(), disable_web_page_preview=True)
 
     await state.set_state("service_add")
-    await state.update_data(message=call.message)
+    await state.update_data(message=pickle.dumps(call.message))
 
 
 @dp.message_handler(state="service_add")
@@ -204,7 +205,7 @@ async def service_add_handler(message: types.Message, state: FSMContext):
 
     user = db.get_user(message.chat.id)
 
-    ask_message = (await state.get_data()).get("message")
+    ask_message = pickle.loads((await state.get_data()).get("message"))
     await message.delete()
 
     split_message = message.text.split("|")

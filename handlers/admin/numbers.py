@@ -1,3 +1,4 @@
+import pickle
 from sqlite3 import IntegrityError
 
 from aiogram import types
@@ -56,7 +57,7 @@ async def number_edit_attribute(call: types.CallbackQuery, state: FSMContext, ca
     await state.set_state("number_edit_attribute")
     await state.update_data(extra=extra,
                             number_id=number_id,
-                            call=call)
+                            call=pickle.dumps(call))
 
     text = "<b>Отправьте значение</b>"
     await user.edit_message_text(call.message.message_id, text, reply_markup=numbers_cancel_keyboard(number.id, back_text=True))
@@ -73,7 +74,7 @@ async def number_delete_confirm(call: types.CallbackQuery, state: FSMContext, ca
 async def number_edit_attribute_handler(message: types.Message, state: FSMContext):
     await message.delete()
 
-    call: types.CallbackQuery = (await state.get_data()).get("call")
+    call: types.CallbackQuery = pickle.loads((await state.get_data()).get("call"))
     extra = (await state.get_data()).get("extra")
     number_id = (await state.get_data()).get("number_id")
     number = db.get_number(number_id)
@@ -147,7 +148,7 @@ async def number_add(call: types.CallbackQuery, state: FSMContext, callback_data
 
     category_id = callback_data.get("extra")
     await state.set_state("number_add")
-    await state.update_data(message=call.message,
+    await state.update_data(message=pickle.dumps(call.message),
                             category_id=category_id)
 
 
@@ -165,7 +166,7 @@ async def number_add_handler(message: types.Message, state: FSMContext):
 
     user = db.get_user(message.chat.id)
 
-    ask_message = (await state.get_data()).get("message")
+    ask_message = pickle.loads((await state.get_data()).get("message"))
     await message.delete()
 
     split_message = message.text.split("|")
