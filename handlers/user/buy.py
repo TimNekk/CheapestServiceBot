@@ -1,3 +1,4 @@
+import pickle
 from datetime import datetime, timedelta
 
 from aiogram import types
@@ -101,7 +102,7 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
     logger.debug(f"{user.id} получил ссылку на оплату {category.name} - {category.price}₽ ({payment.id})")
 
     await state.set_state('payment')
-    await state.update_data(payment=payment,
+    await state.update_data(payment=pickle.dumps(payment),
                             category_id=category.id,
                             message=call.message)
 
@@ -113,7 +114,7 @@ async def buy_cancel_callback(call: types.CallbackQuery, state: FSMContext, call
     user = db.get_user(call.message.chat.id)
     category_id: int = (await state.get_data()).get("category_id")
     category = db.get_category(category_id)
-    payment: Payment = (await state.get_data()).get("payment")
+    payment: Payment = pickle.loads((await state.get_data()).get("payment"))
 
     logger.debug(f"{user.id} отменил оплату {category.name} - {category.price}₽ ({payment.id})")
 
@@ -140,7 +141,7 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
     category_id: int = (await state.get_data()).get("category_id")
     category = db.get_category(category_id)
 
-    payment: Payment = (await state.get_data()).get("payment")
+    payment: Payment = pickle.loads((await state.get_data()).get("payment"))
     status = payment.status
     logger.debug(f"{user.id} проверил оплату: {status.name} {category.name} - {category.price}₽ ({payment.id})")
 
