@@ -13,7 +13,7 @@ from loader import dp, db
 async def send_message(message: types.Message, state: FSMContext):
     user = db.get_user(message.chat.id)
 
-    ask_message = await user.send_message(f'Введите текст для начала рассылки {dp.storage}', reply_markup=broadcast_keyboard())
+    ask_message = await user.send_message(f'Введите текст для начала рассылки', reply_markup=broadcast_keyboard())
     await state.set_state('broadcast_text')
     await state.update_data(ask_message_id=ask_message.message_id)
 
