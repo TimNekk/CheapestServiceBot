@@ -11,6 +11,7 @@ from utils.db_api.database import Database
 
 bot = Bot(token=BOT_TOKEN, parse_mode=types.ParseMode.HTML)
 storage = RedisStorage2(host=Redis.host, port=Redis.port, password=Redis.password) if Redis.use_redis else MemoryStorage()
+print(storage)
 dp = Dispatcher(bot, storage=storage)
 db = Database()
 
