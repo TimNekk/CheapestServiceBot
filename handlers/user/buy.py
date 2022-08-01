@@ -171,6 +171,7 @@ async def notify_to_pay(message: types.Message, state: FSMContext):
     category_id = (await state.get_data()).get("category_id")
 
     await dp.bot.send_message(
+        chat_id=message.chat.id,
         text='Для начала <i>оплатите</i> или <i>отмените</i> платеж',
         reply_markup=buy_cancel_keyboard(category_id),
         reply_to_message_id=message_id,
