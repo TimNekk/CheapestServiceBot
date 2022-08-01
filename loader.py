@@ -13,8 +13,6 @@ from utils.db_api.database import Database
 bot = Bot(token=BOT_TOKEN, parse_mode=types.ParseMode.HTML)
 storage = RedisStorage2(host=Redis.host, port=Redis.port, password=Redis.password) if Redis.use_redis else MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
-logger.info(Redis.use_redis)
-logger.info(storage)
 db = Database()
 
 vak_sms = VakSMSApi(VAK_SMS_API_KEY)
