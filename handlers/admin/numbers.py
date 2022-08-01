@@ -1,4 +1,3 @@
-import pickle
 from sqlite3 import IntegrityError
 
 from aiogram import types
@@ -10,26 +9,28 @@ from keyboards.inline.admin import numbers_keyboard, numbers_callback_data, numb
 from loader import dp, db
 
 
-async def show_numbers(message: types.Message, category_id: int):
-    user = db.get_user(message.chat.id)
+async def show_numbers(message_id: int, user_id: int, category_id: int):
+    user = db.get_user(user_id)
 
     text = f"""
 Выберите номер
 """
 
-    await user.edit_message_text(message.message_id, text, reply_markup=numbers_keyboard(category_id))
+    await user.edit_message_text(message_id, text, reply_markup=numbers_keyboard(category_id))
 
 
 #region: Edit
 
 
 @dp.callback_query_handler(numbers_callback_data.filter(action="edit"))
-async def number_edit(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
+async def number_edit_handler(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
     await call.answer()
+    await number_edit(call.message.message_id, call.message.chat.id, callback_data.get("number_id"))
 
-    user = db.get_user(call.message.chat.id)
 
-    number_id = callback_data.get("number_id")
+async def number_edit(message_id: int, user_id: int, number_id: int):
+    user = db.get_user(user_id)
+
     number = db.get_number(number_id)
 
     text = f"""
@@ -42,7 +43,7 @@ async def number_edit(call: types.CallbackQuery, state: FSMContext, callback_dat
 <b>Нажмите, чтобы изменить</b>
 """
 
-    await user.edit_message_text(call.message.message_id, text, reply_markup=numbers_edit_keyboard(number.id))
+    await user.edit_message_text(message_id, text, reply_markup=numbers_edit_keyboard(number.id))
 
 
 @dp.callback_query_handler(numbers_callback_data.filter(action="edit_attribute"))
@@ -57,7 +58,7 @@ async def number_edit_attribute(call: types.CallbackQuery, state: FSMContext, ca
     await state.set_state("number_edit_attribute")
     await state.update_data(extra=extra,
                             number_id=number_id,
-                            call=pickle.dumps(call))
+                            message_id=call.message.message_id)
 
     text = "<b>Отправьте значение</b>"
     await user.edit_message_text(call.message.message_id, text, reply_markup=numbers_cancel_keyboard(number.id, back_text=True))
@@ -67,14 +68,15 @@ async def number_edit_attribute(call: types.CallbackQuery, state: FSMContext, ca
 async def number_delete_confirm(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
     await call.answer()
     await state.finish()
-    await number_edit(call, state, callback_data)
+    number_id = callback_data.get("number_id")
+    await number_edit(call.message.message_id, call.message.chat.id, number_id)
 
 
 @dp.message_handler(IsAdmin(), state="number_edit_attribute")
 async def number_edit_attribute_handler(message: types.Message, state: FSMContext):
     await message.delete()
 
-    call: types.CallbackQuery = pickle.loads((await state.get_data()).get("call"))
+    message_id: int = (await state.get_data()).get("message_id")
     extra = (await state.get_data()).get("extra")
     number_id = (await state.get_data()).get("number_id")
     number = db.get_number(number_id)
@@ -86,7 +88,7 @@ async def number_edit_attribute_handler(message: types.Message, state: FSMContex
         number.set_id(message.text)
 
     await state.finish()
-    await number_edit(call, state, {"number_id": number.id})
+    await number_edit(message_id, message.chat.id, number.id)
 
 
 #endregion
@@ -120,7 +122,7 @@ async def number_delete_confirm(call: types.CallbackQuery, state: FSMContext, ca
         await call.message.delete()
         return
 
-    await show_numbers(call.message, number.category_id)
+    await show_numbers(call.message.message_id, call.message.chat.id, number.category_id)
 
 
 #endregion
@@ -148,7 +150,7 @@ async def number_add(call: types.CallbackQuery, state: FSMContext, callback_data
 
     category_id = callback_data.get("extra")
     await state.set_state("number_add")
-    await state.update_data(message=pickle.dumps(call.message),
+    await state.update_data(message_id=call.message.message_id,
                             category_id=category_id)
 
 
@@ -162,11 +164,11 @@ async def number_add_handler(message: types.Message, state: FSMContext):
 {message.text}
 {ADD_TEXT}
         """
-        await user.edit_message_text(ask_message.message_id, text, reply_markup=numbers_cancel_keyboard())
+        await user.edit_message_text(message_id, text, reply_markup=numbers_cancel_keyboard())
 
     user = db.get_user(message.chat.id)
 
-    ask_message = pickle.loads((await state.get_data()).get("message"))
+    message_id = (await state.get_data()).get("message_id")
     await message.delete()
 
     split_message = message.text.split("|")
@@ -187,7 +189,7 @@ async def number_add_handler(message: types.Message, state: FSMContext):
         return
 
     await state.finish()
-    await show_numbers(ask_message, category_id)
+    await show_numbers(message_id, message.chat.id, category_id)
 
 
 #endregion
@@ -209,7 +211,7 @@ async def service_delete_confirm(call: types.CallbackQuery, state: FSMContext, c
 
     await state.finish()
 
-    await show_numbers(call.message, category_id)
+    await show_numbers(call.message.message_id, call.message.chat.id, category_id)
 
 
 #endregion

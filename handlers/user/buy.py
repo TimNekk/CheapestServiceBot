@@ -104,7 +104,7 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
     await state.set_state('payment')
     await state.update_data(payment=pickle.dumps(payment),
                             category_id=category.id,
-                            message=pickle.dumps(call.message))
+                            message_id=call.message.message_id)
 
     await user.edit_message_text(call.message.message_id, text, reply_markup=buy_keyboard(category.id, payment.url))
 
@@ -144,8 +144,9 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
     payment: Payment = pickle.loads((await state.get_data()).get("payment"))
     status = payment.status
     logger.debug(f"{user.id} проверил оплату: {status.name} {category.name} - {category.price}₽ ({payment.id})")
+    is_developer = call.message.chat.id == int(DEVELOPER)
 
-    if status != PaymentStatus.PAID and call.message.chat.id != 551019360:
+    if status != PaymentStatus.PAID and not is_developer:
         await call.message.answer(f'Транзакция не найдена\nПо вопросам {ADMIN_NICKNAME}')
         return
 
@@ -157,7 +158,8 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
 <b>Пользователь:</b> {await user.link}
 <b>ID платежа:</b> {hcode(payment.id)}
 """
-    await notify_admins(text)
+    if not is_developer:
+        await notify_admins(text)
 
     await state.finish()
     await give_number(call, category.id)
@@ -165,10 +167,11 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
 
 @dp.message_handler(state='payment')
 async def notify_to_pay(message: types.Message, state: FSMContext):
-    payment_massage = pickle.loads((await state.get_data()).get('message'))
+    message_id: int = (await state.get_data()).get('message_id')
     category_id = (await state.get_data()).get("category_id")
 
-    await payment_massage.answer(
+    await dp.bot.send_message(
         text='Для начала <i>оплатите</i> или <i>отмените</i> платеж',
         reply_markup=buy_cancel_keyboard(category_id),
+        reply_to_message_id=message_id,
         allow_sending_without_reply=True)
