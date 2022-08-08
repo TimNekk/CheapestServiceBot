@@ -52,6 +52,7 @@ class Commands:
     @dataclass
     class Admin:
         settings = CommandInfo("admin", "Админка")
+        prolong = CommandInfo("prolong", "Продлить номер")
         send = CommandInfo("send", "Рассылка")
         stats = CommandInfo("stats", "Статистика")
 
