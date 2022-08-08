@@ -41,36 +41,39 @@ async def prolong_number(message: types.Message, state: FSMContext):
     service_id = (await state.get_data()).get("service_id")
     service = db.get_service(service_id)
 
-    numbers = re.findall(r'(?:\+|)(7[\d ]{9,}\d)', message.text)
-    if not numbers:
-        await message.answer("Неверный формат номера")
+    text = "<b>Номера продлены:</b>"
+
+    prolonged_numbers = {}
+    for number in message.text.split("\n"):
+        number = re.findall(r'(?:\+|)(7[\d ]{9,}\d)', number)
+        if not number:
+            await message.answer("Неверный формат номера")
+            return
+
+        number = number[0]
+        try:
+            id_num = vak_sms.prolong_number(number, service.code)
+            text += f"\n<code>{number}|{id_num}</code>"
+            prolonged_numbers[number] = id_num
+        except NoNumber:
+            await message.answer(f"Номер +{number} активен или не существует")
+
+    if not prolonged_numbers:
         return
 
-    number = numbers[0]
-    try:
-        new_id_num = vak_sms.prolong_number(number, service.code)
-    except NoNumber:
-        await message.answer("Номер активен или не существует")
-        return
-
-    text = f"""
-<b>Номер продлен</b>
-Номер: +<code>{number}</code>
-ID: <code>{new_id_num}</code>
-<code>{number}|{new_id_num}</code>
-
-Куда его добавить?
-"""
-    await user.send_message(text, reply_markup=prolong_categories_keyboard(service_id, number, new_id_num))
-    await state.finish()
+    text = "Куда их добавить?"
+    await user.send_message(text, reply_markup=prolong_categories_keyboard(service_id))
+    await state.update_data(prolonged_numbers=prolonged_numbers)
 
 
-@dp.callback_query_handler(IsAdmin(), prolong_categories_callback_data.filter())
-async def add_number_to_category(call: types.CallbackQuery, callback_data: dict):
+@dp.callback_query_handler(IsAdmin(), prolong_categories_callback_data.filter(), state='prolong_number')
+async def add_number_to_category(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
     category_id = callback_data.get("category_id")
-    number = callback_data.get("number")
-    id = callback_data.get("id")
+    prolonged_numbers: dict[str, str] = (await state.get_data()).get("prolonged_numbers")
 
-    db.add_number(id, category_id, number)
+    for number, id_num in prolonged_numbers.items():
+        db.add_number(id_num, category_id, number)
 
     await call.message.edit_text("Добавлено!")
+
+    await state.finish()
