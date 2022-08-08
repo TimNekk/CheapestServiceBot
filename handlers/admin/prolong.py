@@ -22,7 +22,7 @@ async def save_prolong_service(call: types.CallbackQuery, state: FSMContext, cal
     service_id = callback_data.get("service_id")
     service = db.get_service(service_id)
 
-    await call.message.edit_text(f"Введите номер для продления\n <b>{service.name}</b>",
+    await call.message.edit_text(f"Введите номера для продления\n <b>{service.name}</b>",
                                  reply_markup=prolong_cancel_keyboard())
 
     await state.set_state("prolong_number")
