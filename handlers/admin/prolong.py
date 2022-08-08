@@ -61,7 +61,7 @@ async def prolong_number(message: types.Message, state: FSMContext):
     if not prolonged_numbers:
         return
 
-    text = "Куда их добавить?"
+    text += "\n\nКуда их добавить?"
     await user.send_message(text, reply_markup=prolong_categories_keyboard(service_id))
     await state.update_data(prolonged_numbers=prolonged_numbers)
 
