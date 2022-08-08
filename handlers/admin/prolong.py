@@ -34,6 +34,10 @@ async def save_prolong_service(call: types.CallbackQuery, state: FSMContext, cal
 
 @dp.callback_query_handler(IsAdmin(), prolong_cancel_callback_data.filter(), state='*')
 async def cancel_prolong_service(call: types.CallbackQuery, state: FSMContext):
+    ask_message_id: int = (await state.get_data()).get("ask_message_id")
+    if ask_message_id:
+        await dp.bot.delete_message(call.message.chat.id, ask_message_id)
+
     await call.message.edit_text("Отменено")
     await state.finish()
 
