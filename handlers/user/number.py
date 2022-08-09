@@ -69,7 +69,7 @@ async def wait_for_code(working_number: Number, sms_count: int, call: types.Call
     code: Optional[str] = None
     while give_time + timedelta(minutes=20) > datetime.utcnow():
         sms_s = sms_api.getRentStatus(working_number.id).get('values')
-        if len(sms_s) > sms_count:
+        if len(sms_s) > sms_count > 0:
             code = re.findall(r"Urent: (\d*)", list(sms_s.values())[0].get("text"))[0]
             break
         else:
