@@ -73,7 +73,7 @@ async def wait_for_code(working_number: Number, sms_count: int, call: types.Call
         sms_s = sms_api.getRentStatus(working_number.id).get('values')
         if len(sms_s) > sms_count and len(sms_s) > 0:
             try:
-                code = re.findall(r"Urent: (\d*)", list(sms_s.values())[0].get("text"))[0]
+                code = re.findall(r"\d+", list(sms_s.values())[0].get("text"))[0]
             except IndexError:
                 logger.error(f"Index Error for {sms_s}")
                 await asyncio.sleep(3)
