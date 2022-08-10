@@ -46,6 +46,7 @@ async def give_number(call: types.CallbackQuery, category_id: int):
 <b>Время на активацию:</b> 20 минут
 
 Вы можете входить в аккаунт, я сразу же отправлю вам код из СМС.
+Новые смс будут приходить в течении 20 минут.
 """
 
     await call.message.delete()
@@ -71,7 +72,15 @@ async def wait_for_code(working_number: Number, sms_count: int, call: types.Call
         sms_s = sms_api.getRentStatus(working_number.id).get('values')
         if len(sms_s) > sms_count and len(sms_s) > 0:
             code = re.findall(r"Urent: (\d*)", list(sms_s.values())[0].get("text"))[0]
-            break
+
+            text = f"""
+            <b>Номер:</b> {hcode(working_number.phone_number)}
+            <b>Код из СМС:</b> {hcode(code)}
+            """
+
+            await user.send_message(text)
+
+            sms_count = len(sms_s)
         else:
             await asyncio.sleep(3)
 
@@ -79,13 +88,6 @@ async def wait_for_code(working_number: Number, sms_count: int, call: types.Call
         working_number.set_busy(False)
         await user.send_message("Время на активацию истекло")
         return
-
-    text = f"""
-<b>Номер:</b> {hcode(working_number.phone_number)}
-<b>Код из СМС:</b> {hcode(code)}
-"""
-
-    await user.send_message(text)
 
     working_number.delete()
 
