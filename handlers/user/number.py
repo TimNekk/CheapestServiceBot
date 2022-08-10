@@ -6,6 +6,7 @@ from typing import Optional
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hcode
+from loguru import logger
 
 from data.config import ADMIN_NICKNAME
 from keyboards.inline.admin import delete_number_keyboard
@@ -71,7 +72,11 @@ async def wait_for_code(working_number: Number, sms_count: int, call: types.Call
     while give_time + timedelta(minutes=20) > datetime.utcnow():
         sms_s = sms_api.getRentStatus(working_number.id).get('values')
         if len(sms_s) > sms_count and len(sms_s) > 0:
-            code = re.findall(r"Urent: (\d*)", list(sms_s.values())[0].get("text"))[0]
+            try:
+                code = re.findall(r"Urent: (\d*)", list(sms_s.values())[0].get("text"))[0]
+            except IndexError:
+                logger.error(f"Index Error for {sms_s}")
+                continue
 
             text = f"""
 <b>Номер:</b> {hcode(working_number.phone_number)}
