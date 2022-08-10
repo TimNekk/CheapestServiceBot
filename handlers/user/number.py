@@ -90,5 +90,3 @@ async def wait_for_code(working_number: Number, sms_count: int, call: types.Call
         return
 
     working_number.delete()
-
-    # TODO: (FUTURE) Сделать кнопку повторного запроса кода
