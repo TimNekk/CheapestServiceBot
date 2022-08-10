@@ -76,6 +76,7 @@ async def wait_for_code(working_number: Number, sms_count: int, call: types.Call
                 code = re.findall(r"Urent: (\d*)", list(sms_s.values())[0].get("text"))[0]
             except IndexError:
                 logger.error(f"Index Error for {sms_s}")
+                await asyncio.sleep(3)
                 continue
 
             text = f"""
