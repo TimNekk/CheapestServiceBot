@@ -1,11 +1,13 @@
+import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Union
 
 from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, InputFile, MediaGroup, InputMedia, InputMediaPhoto
-from aiogram.utils.exceptions import BotBlocked, ChatNotFound, BotKicked, UserDeactivated, BadRequest, MessageToEditNotFound, MessageCantBeEdited, \
-    MessageNotModified
+from aiogram.utils.exceptions import BotBlocked, ChatNotFound, BotKicked, UserDeactivated, BadRequest, \
+    MessageToEditNotFound, MessageCantBeEdited, \
+    MessageNotModified, NetworkError
 
 
 @dataclass
@@ -25,13 +27,18 @@ class User:
     async def _check_ban(self):
         from loader import dp
 
-        try:
-            await dp.bot.send_chat_action(self.id, 'typing')
-        except (BotBlocked, ChatNotFound):
-            self.ban()
-        except (UserDeactivated, BotKicked):
-            self.ban()
-            self.delete()
+        while True:
+            try:
+                await dp.bot.send_chat_action(self.id, 'typing')
+            except (BotBlocked, ChatNotFound):
+                self.ban()
+            except (UserDeactivated, BotKicked):
+                self.ban()
+                self.delete()
+            except NetworkError:
+                await asyncio.sleep(5)
+                continue
+            break
 
     @property
     async def link(self):
