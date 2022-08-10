@@ -74,8 +74,8 @@ async def wait_for_code(working_number: Number, sms_count: int, call: types.Call
             code = re.findall(r"Urent: (\d*)", list(sms_s.values())[0].get("text"))[0]
 
             text = f"""
-            <b>Номер:</b> {hcode(working_number.phone_number)}
-            <b>Код из СМС:</b> {hcode(code)}
+<b>Номер:</b> {hcode(working_number.phone_number)}
+<b>Код из СМС:</b> {hcode(code)}
             """
 
             await user.send_message(text)
