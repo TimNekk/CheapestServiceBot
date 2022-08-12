@@ -43,7 +43,7 @@ async def give_number(call: types.CallbackQuery, category_id: int):
 
     text = f"""
 <b>Успешно!</b>
-<b>Номер:</b> {hcode(working_number.phone_number)}
+<b>Номер:</b> 7{hcode(str(working_number.phone_number)[1:])}
 <b>Время на активацию:</b> 20 минут
 
 Вы можете входить в аккаунт, я сразу же отправлю вам код из СМС.
@@ -55,9 +55,15 @@ async def give_number(call: types.CallbackQuery, category_id: int):
 
     await asyncio.sleep(5)
     text = f"""
-Если в течение 1 минуты вам не придёт код, <b>переустановите приложение и отключитесь от вай фай, и введите заново этот номер.</b>
+<b>Аккаунт рабочий. На нашей стороне проблем нет.</b>
 
-<i>Если проблема не решится, пишите нам в поддержку.</i>
+<i>Что ты можешь сделать?</i>
+
+1. Удалить приложение Urent
+2. Перейти на мобильные интернет
+3. Перезагрузить телефон
+4. Установить Urent
+5. Войти в аккаунт
 """
     await user.send_message(text)
 
