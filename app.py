@@ -1,5 +1,5 @@
 import sys
-from datetime import time
+from datetime import time, timedelta
 
 from aiogram import executor
 from loguru import logger
@@ -8,12 +8,11 @@ from loader import dp
 import middlewares, filters, handlers
 from utils.notify_admins import on_startup_notify
 from utils.set_bot_commands import set_default_commands
+from utils import logging
 
 
 async def on_startup(dispatcher):
-    logger.remove()
-    logger.add(sys.stderr, level="INFO")
-    logger.add(f"logs/CSB.log", rotation="00:00", retention="3 days", level="DEBUG")
+    logging.setup(f"CSB", rotation=time(hour=0), retention=timedelta(days=3))
 
     # Устанавливаем дефолтные команды
     await set_default_commands(dispatcher)
