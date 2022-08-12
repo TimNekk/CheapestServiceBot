@@ -29,7 +29,7 @@ def setup(file_name: str = "log", rotation: time = time(), retention: timedelta 
     logging.basicConfig(handlers=[InterceptHandler()], level=0)
 
     # Disable aiogram_broadcaster logging
-    logging.getLogger("root").setLevel(logging.FATAL)
+    # logging.getLogger("root").setLevel(logging.FATAL)
 
     # Setup loguru
     logger.remove()
