@@ -25,7 +25,7 @@ async def give_number(call: types.CallbackQuery, category_id: int):
         response = sms_api.getRentStatus(number.id)
         status = response.get('status')
 
-        if status == "success" or (status == "error" and status.get('message') == "STATUS_WAIT_CODE"):
+        if status == "success" or (status == "error" and response.get('message') == "STATUS_WAIT_CODE"):
             working_number = number
             break
 
