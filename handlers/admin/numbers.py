@@ -9,14 +9,14 @@ from keyboards.inline.admin import numbers_keyboard, numbers_callback_data, numb
 from loader import dp, db
 
 
-async def show_numbers(message_id: int, user_id: int, category_id: int):
+async def show_numbers(message_id: int, user_id: int, category_id: int, offset: int = 0, limit: int = 10):
     user = db.get_user(user_id)
 
     text = f"""
 Выберите номер
 """
 
-    await user.edit_message_text(message_id, text, reply_markup=numbers_keyboard(category_id))
+    await user.edit_message_text(message_id, text, reply_markup=numbers_keyboard(category_id, offset, limit))
 
 
 #region: Edit
