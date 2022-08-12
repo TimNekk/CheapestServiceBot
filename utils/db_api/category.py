@@ -18,12 +18,16 @@ class Category:
         self.show = self.show == 1
         self.description = self.description.replace('\\n', '\n') if self.description else None
 
-    def get_numbers(self, not_busy: bool = True) -> list[Number]:
+    def get_numbers(self, not_busy: bool = True, limit: int = 0, offset: int = 0) -> list[Number]:
         from loader import db
 
         sql = 'SELECT * FROM Numbers WHERE category_id = ?'
         if not_busy:
             sql += ' AND busy = 0'
+        if limit:
+            sql += f' LIMIT {limit}'
+        if offset:
+            sql += f' OFFSET {offset}'
 
         numbers = []
         for number in db.execute(sql, parameters=(self.id,), fetchall=True):
