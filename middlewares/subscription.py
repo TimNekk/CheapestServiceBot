@@ -4,7 +4,8 @@ from aiogram import Dispatcher
 from aiogram.dispatcher.handler import current_handler, CancelHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
-from aiogram.utils.exceptions import RetryAfter
+from aiogram.utils.exceptions import RetryAfter, ChatNotFound
+from loguru import logger
 
 from data.config import Subscription
 from keyboards.inline import subscribe_keyboard
@@ -21,7 +22,11 @@ class SubscriptionMiddleware(BaseMiddleware):
     async def check_subscription(message: Message, call: Optional[CallbackQuery] = None):
         dispatcher = Dispatcher.get_current()
 
-        check_user = await dispatcher.bot.get_chat_member(chat_id=Subscription.id, user_id=message.chat.id)
+        try:
+            check_user = await dispatcher.bot.get_chat_member(chat_id=Subscription.id, user_id=message.chat.id)
+        except ChatNotFound:
+            logger.warning(f"Chat {Subscription.id} not found")
+            return
         if check_user.status not in ['creator', 'administrator', 'member']:
             text = "Для продолжения подпишитесь на канал"
 
