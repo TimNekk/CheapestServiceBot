@@ -88,6 +88,7 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
     category_id: int = callback_data.get("category_id")
     category = db.get_category(category_id)
     payment: Payment = LavaPayment(category.price, description=category.name)
+    decoded_payment = pickle.dumps(payment).decode("latin1")
 
     text = f"""
 ➖➖➖➖➖➖➖➖➖➖➖
@@ -99,10 +100,10 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
 🆔 <b>ID платежа:</b> {hcode(payment.id)}
 """
 
-    logger.debug(f"{user.id} получил ссылку на оплату {category.name} - {category.price}₽ ({payment.id})")
+    logger.debug(f"{user.id} получил ссылку на оплату {category.name} - {category.price}₽ {decoded_payment}")
 
     await state.set_state('payment')
-    await state.update_data(payment=pickle.dumps(payment).decode("latin1"),
+    await state.update_data(payment=decoded_payment,
                             category_id=category.id,
                             message_id=call.message.message_id)
 
