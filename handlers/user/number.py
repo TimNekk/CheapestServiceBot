@@ -78,8 +78,10 @@ async def wait_for_code(working_number: Number, sms_count: int, call: types.Call
     while give_time + timedelta(minutes=20) > datetime.utcnow():
         sms_s = sms_api.getRentStatus(working_number.id).get('values')
         logger.info(sms_s)
+        logger.info(f"{len(sms_s)} {sms_count}")
         if len(sms_s) > sms_count and len(sms_s) > 0:
             try:
+                logger.info("Getting code")
                 code = re.findall(r"\d+", list(sms_s.values())[0].get("text"))[0]
             except IndexError:
                 logger.error(f"Index Error for {sms_s}")
