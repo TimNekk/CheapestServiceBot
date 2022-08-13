@@ -83,6 +83,8 @@ async def categories_callback(call: types.CallbackQuery, state: FSMContext, call
 
 @dp.callback_query_handler(category_callback_data.filter())
 async def category_callback(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
+    await call.answer(cache_time=5)
+
     user = db.get_user(call.message.chat.id)
 
     category_id: int = callback_data.get("category_id")
@@ -135,7 +137,7 @@ async def buy_paid_callback2(call: types.CallbackQuery, state: FSMContext, callb
 
 @dp.callback_query_handler(buy_callback_data.filter(action="paid"), state='payment')
 async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
-    await call.answer(cache_time=3)
+    await call.answer(cache_time=5)
 
     user = db.get_user(call.message.chat.id)
 
@@ -143,6 +145,8 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
     category = db.get_category(category_id)
 
     payment: Payment = pickle.loads((await state.get_data()).get("payment").encode("latin1"))
+    await state.finish()
+
     status = payment.status
     logger.debug(f"{user.id} проверил оплату: {status.name} {category.name} - {category.price}₽ ({payment.id})")
     is_developer = call.message.chat.id == int(DEVELOPER)
@@ -162,7 +166,6 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
     if not is_developer:
         await notify_admins(text)
 
-    await state.finish()
     await give_number(call, category.id)
 
 
