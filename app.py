@@ -12,7 +12,7 @@ from utils import logging
 
 
 async def on_startup(dispatcher):
-    logging.setup(f"CSB", rotation=time(hour=0), retention=timedelta(days=3))
+    logging.setup(f"CSB.log", rotation=time(hour=0), retention=timedelta(days=3))
 
     # Устанавливаем дефолтные команды
     await set_default_commands(dispatcher)
