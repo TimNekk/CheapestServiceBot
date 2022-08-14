@@ -132,7 +132,7 @@ async def buy_cancel_callback(call: types.CallbackQuery):
 
 @dp.callback_query_handler(buy_callback_data.filter(action="paid"))
 async def buy_paid_callback2(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
-    logger.debug(f"Пользователь {call.message.chat.id} оплатил нажал на проверку без стейта")
+    logger.debug(f"Пользователь {call.message.chat.id} нажал на проверку без стейта")
 
 
 @dp.callback_query_handler(buy_callback_data.filter(action="paid"), state='payment')
@@ -145,7 +145,6 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
     category = db.get_category(category_id)
 
     payment: Payment = pickle.loads((await state.get_data()).get("payment").encode("latin1"))
-    await state.finish()
 
     status = payment.status
     logger.debug(f"{user.id} проверил оплату: {status.name} {category.name} - {category.price}₽ ({payment.id})")
@@ -160,6 +159,7 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
 """
         await call.message.answer(text)
         return
+    await state.finish()
 
     user.add_paid(payment.amount)
 
