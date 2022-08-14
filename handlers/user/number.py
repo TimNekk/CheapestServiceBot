@@ -77,8 +77,6 @@ async def wait_for_code(working_number: Number, sms_count: int, call: types.Call
     code: Optional[str] = None
     while give_time + timedelta(minutes=20) > datetime.utcnow():
         sms_s = sms_api.getRentStatus(working_number.id).get('values')
-        logger.info(sms_s)
-        logger.info(f"{len(sms_s)} {sms_count}")
         if len(sms_s) > sms_count and len(sms_s) > 0:
             try:
                 logger.info("Getting code")
