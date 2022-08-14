@@ -152,7 +152,13 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
     is_developer = call.message.chat.id == int(DEVELOPER)
 
     if status != PaymentStatus.PAID and not is_developer:
-        await call.message.answer(f'Транзакция не найдена\nПо вопросам {ADMIN_NICKNAME}')
+        text = f"""
+<b>Транзакция не найдена</b>
+Повторите проверку через 10 секунд
+
+<i>По вопросам {ADMIN_NICKNAME}</i>
+"""
+        await call.message.answer(text)
         return
 
     user.add_paid(payment.amount)
