@@ -1,18 +1,17 @@
 import asyncio
-import re
 from datetime import datetime, timedelta
 from typing import Optional
 
 from aiogram import types
-from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hcode
 from loguru import logger
 
 from data.config import ADMIN_NICKNAME
 from keyboards.inline.admin import delete_number_keyboard
-from loader import db, sms_api
+from loader import db, vak_sms
 from utils.db_api.number import Number
 from utils.notify_admins import notify_admins
+from utils.vak_sms import IdNumNotFound, NoCode, Status, NoNumber
 
 
 async def give_number(call: types.CallbackQuery, category_id: int):
@@ -22,12 +21,25 @@ async def give_number(call: types.CallbackQuery, category_id: int):
 
     working_number: Optional[Number] = None
     for number in numbers:
-        response = sms_api.getRentStatus(number.id)
-        status = response.get('status')
-
-        if status == "success" or (status == "error" and response.get('message') == "STATUS_WAIT_CODE"):
+        try:
+            vak_sms.get_code(number.id)
+        except IdNumNotFound:
+            continue
+        except NoCode:
             working_number = number
             break
+
+        vak_sms.set_status(number.id, Status.RESEND)
+        working_number = number
+
+    if not working_number:
+        for number in numbers:
+            try:
+                working_number = number.prolong()
+                break
+            except NoNumber:
+                await notify_admins(f"Номер {number.phone_number} не работает",
+                                    reply_markup=delete_number_keyboard(number.id))
 
     if not working_number:
         text = f"""
@@ -38,8 +50,8 @@ async def give_number(call: types.CallbackQuery, category_id: int):
         await notify_admins(f"<b>Нет номер из категории:</b> {category.service.name} - {category.name}")
         return
 
+    logger.info(f"{user.id} получил номер {working_number.phone_number} ({working_number.id})")
     working_number.set_busy(True)
-    sms_count = len(response.get('values'))
 
     text = f"""
 <b>Успешно!</b>
@@ -67,35 +79,32 @@ async def give_number(call: types.CallbackQuery, category_id: int):
 """
     await user.send_message(text)
 
-    await wait_for_code(working_number, sms_count, call)
+    await wait_for_code(working_number, call)
 
 
-async def wait_for_code(working_number: Number, sms_count: int, call: types.CallbackQuery) -> None:
+async def wait_for_code(working_number: Number, call: types.CallbackQuery) -> None:
     user = db.get_user(call.message.chat.id)
 
     give_time = datetime.utcnow()
     code: Optional[str] = None
     while give_time + timedelta(minutes=20) > datetime.utcnow():
-        sms_s = sms_api.getRentStatus(working_number.id).get('values')
-        if len(sms_s) > sms_count and len(sms_s) > 0:
-            try:
-                logger.info("Getting code")
-                code = re.findall(r"\d+", list(sms_s.values())[0].get("text"))[0]
-            except IndexError:
-                logger.error(f"Index Error for {sms_s}")
-                await asyncio.sleep(3)
-                continue
+        try:
+            code = vak_sms.get_code(working_number.id)
+        except NoCode:
+            await asyncio.sleep(5)
+            continue
+        except IdNumNotFound:
+            working_number.prolong()
+            continue
 
-            text = f"""
-<b>Номер:</b> {hcode(working_number.phone_number)}
+        text = f"""
+<b>Номер:</b> 7{hcode(str(working_number.phone_number)[1:])}
 <b>Код из СМС:</b> {hcode(code)}
-            """
+"""
 
-            await user.send_message(text)
-
-            sms_count = len(sms_s)
-        else:
-            await asyncio.sleep(3)
+        logger.info(f"{user.id} получил код {code} от {working_number.phone_number} ({working_number.id})")
+        await user.send_message(text)
+        vak_sms.set_status(working_number.id, Status.RESEND)
 
     if not code and working_number:
         working_number.set_busy(False)
