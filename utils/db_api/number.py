@@ -17,7 +17,12 @@ class Number:
         return db.get_category(self.category_id)
 
     def prolong(self) -> 'Number':
-        raise NotImplementedError
+        from loader import vak_sms
+
+        new_id = vak_sms.prolong_number(self.phone_number, self.category.service.code)
+        self._update('id', new_id)
+        self.id = new_id
+        return self
 
     def set_number(self, value: int) -> None:
         self._update('number', value)
