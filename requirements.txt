@@ -5,4 +5,3 @@ validators
 aiogram_broadcaster
 loguru
 aioredis
-smsactivate
