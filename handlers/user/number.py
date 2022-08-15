@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from aiogram import types
-from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hcode
+from loguru import logger
 
 from data.config import ADMIN_NICKNAME
 from keyboards.inline.admin import delete_number_keyboard
@@ -50,14 +50,16 @@ async def give_number(call: types.CallbackQuery, category_id: int):
         await notify_admins(f"<b>Нет номер из категории:</b> {category.service.name} - {category.name}")
         return
 
+    logger.info(f"{user.id} получил номер {working_number.phone_number} ({working_number.id})")
     working_number.set_busy(True)
 
     text = f"""
 <b>Успешно!</b>
-<b>Номер:</b> {hcode(working_number.phone_number)}
+<b>Номер:</b> 7{hcode(str(working_number.phone_number)[1:])}
 <b>Время на активацию:</b> 20 минут
 
 Вы можете входить в аккаунт, я сразу же отправлю вам код из СМС.
+Новые смс будут приходить в течении 20 минут.
 """
 
     await call.message.delete()
@@ -65,9 +67,15 @@ async def give_number(call: types.CallbackQuery, category_id: int):
 
     await asyncio.sleep(5)
     text = f"""
-Если в течение 1 минуты вам не придёт код, <b>переустановите приложение и отключитесь от вай фай, и введите заново этот номер.</b>
+<b>Аккаунт рабочий. На нашей стороне проблем нет.</b>
 
-<i>Если проблема не решится, пишите нам в поддержку.</i>
+<i>Что ты можешь сделать?</i>
+
+1. Удалить приложение Urent
+2. Перейти на мобильные интернет
+3. Перезагрузить телефон
+4. Установить Urent
+5. Войти в аккаунт
 """
     await user.send_message(text)
 
@@ -80,31 +88,27 @@ async def wait_for_code(working_number: Number, call: types.CallbackQuery) -> No
     give_time = datetime.utcnow()
     code: Optional[str] = None
     while give_time + timedelta(minutes=20) > datetime.utcnow():
-        # if db.get_number(working_number.id) is None:
-        #     return
-
         try:
             code = vak_sms.get_code(working_number.id)
-            break
         except NoCode:
-            await asyncio.sleep(3)
+            await asyncio.sleep(5)
             continue
         except IdNumNotFound:
             working_number.prolong()
             continue
+
+        text = f"""
+<b>Номер:</b> 7{hcode(str(working_number.phone_number)[1:])}
+<b>Код из СМС:</b> {hcode(code)}
+"""
+
+        logger.info(f"{user.id} получил код {code} от {working_number.phone_number} ({working_number.id})")
+        await user.send_message(text)
+        vak_sms.set_status(working_number.id, Status.RESEND)
 
     if not code and working_number:
         working_number.set_busy(False)
         await user.send_message("Время на активацию истекло")
         return
 
-    text = f"""
-<b>Номер:</b> {hcode(working_number.phone_number)}
-<b>Код из СМС:</b> {hcode(code)}
-"""
-
-    await user.send_message(text)
-
     working_number.delete()
-
-    # TODO: (FUTURE) Сделать кнопку повторного запроса кода

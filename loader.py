@@ -1,9 +1,9 @@
+import re
 from datetime import timedelta
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
-from loguru import logger
 from pypayment import LavaPayment, ChargeCommission
 
 from data.config import Lava, BOT_TOKEN, VAK_SMS_API_KEY, Redis

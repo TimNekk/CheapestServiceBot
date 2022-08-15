@@ -38,7 +38,6 @@ async def cancel_prolong_service(call: types.CallbackQuery, state: FSMContext):
     if ask_message_id:
         await dp.bot.delete_message(call.message.chat.id, ask_message_id)
 
-    await call.message.edit_text("Отменено")
     await state.finish()
 
 

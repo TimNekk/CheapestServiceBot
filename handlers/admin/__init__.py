@@ -3,4 +3,5 @@ from .categories import dp
 from .numbers import dp
 from .send import dp
 from .stats import dp
+from .log import dp
 from .prolong import dp

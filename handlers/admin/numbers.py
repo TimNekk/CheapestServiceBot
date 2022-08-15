@@ -9,14 +9,14 @@ from keyboards.inline.admin import numbers_keyboard, numbers_callback_data, numb
 from loader import dp, db
 
 
-async def show_numbers(message_id: int, user_id: int, category_id: int):
+async def show_numbers(message_id: int, user_id: int, category_id: int, offset: int = 0, limit: int = 10):
     user = db.get_user(user_id)
 
     text = f"""
 Выберите номер
 """
 
-    await user.edit_message_text(message_id, text, reply_markup=numbers_keyboard(category_id))
+    await user.edit_message_text(message_id, text, reply_markup=numbers_keyboard(category_id, offset, limit))
 
 
 #region: Edit
@@ -131,12 +131,14 @@ async def number_delete_confirm(call: types.CallbackQuery, state: FSMContext, ca
 
 
 ADD_TEXT = f"""
-<b>Введите следующие данные для добавления нового номера (через | без пробелов)</b>
+<b>Введите следующие данные для добавления новых номеров (через | без пробелов)</b>
 
 Номер|ID
+Номер2|ID2
 
 <b>Пример:</b>
 <i>7999111133344|1657804225303080</i>
+<i>7999111133345|1657804225303081</i>
 """
 
 
@@ -168,25 +170,27 @@ async def number_add_handler(message: types.Message, state: FSMContext):
 
     user = db.get_user(message.chat.id)
 
+    category_id = (await state.get_data()).get("category_id")
     message_id = (await state.get_data()).get("message_id")
     await message.delete()
 
-    split_message = message.text.split("|")
+    split_message = message.text.split("\n")
+    split_lines = list(map(lambda x: x.split("|"), split_message))
 
-    if len(split_message) != 2:
-        await send_error("Неверный формат данных!")
-        return
+    for split_line in split_lines:
+        if len(split_line) != 2:
+            await send_error("Неверный формат данных!")
+            return
 
-    number, number_id = split_message
+        number, number_id = split_line
 
-    # TODO: Проверка на валидность значения
+        # TODO: Проверка на валидность значения
 
-    category_id = (await state.get_data()).get("category_id")
-    try:
-        db.add_number(number_id, category_id, number)
-    except IntegrityError as e:
-        await send_error(f"Ошибка добавлния в Базу Данных: {e}")
-        return
+        try:
+            db.add_number(number_id, category_id, number)
+        except IntegrityError as e:
+            await send_error(f"Ошибка добавления в Базу Данных: {e}")
+            return
 
     await state.finish()
     await show_numbers(message_id, message.chat.id, category_id)

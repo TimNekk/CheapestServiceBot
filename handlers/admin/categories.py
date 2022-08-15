@@ -263,3 +263,17 @@ async def category_delete_confirm(call: types.CallbackQuery, state: FSMContext, 
 
 
 #endregion
+
+
+#region: Pages
+
+
+@dp.callback_query_handler(categories_callback_data.filter(action="page"))
+async def number_page(call: types.CallbackQuery, callback_data: dict):
+    await call.answer()
+    category_id = callback_data.get("category_id")
+    offset = callback_data.get("extra")
+    await show_numbers(call.message.message_id, call.message.chat.id, category_id, offset=int(offset))
+
+
+#endregion

@@ -17,7 +17,7 @@ class Number:
         return db.get_category(self.category_id)
 
     def prolong(self) -> 'Number':
-        from loader import db, vak_sms
+        from loader import vak_sms
 
         new_id = vak_sms.prolong_number(self.phone_number, self.category.service.code)
         self._update('id', new_id)
