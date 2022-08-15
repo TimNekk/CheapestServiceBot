@@ -102,7 +102,7 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
 🆔 <b>ID платежа:</b> {hcode(payment.id)}
 """
 
-    logger.debug(f"{user.id} получил ссылку на оплату {category.name} - {category.price}₽ {decoded_payment}")
+    logger.info(f"{user.id} получил ссылку на оплату {category.name} - {category.price}₽ ({payment.id} {payment.url})")
 
     await state.set_state('payment')
     await state.update_data(payment=decoded_payment,
@@ -119,7 +119,7 @@ async def buy_cancel_callback(call: types.CallbackQuery, state: FSMContext, call
     category = db.get_category(category_id)
     payment: Payment = pickle.loads((await state.get_data()).get("payment").encode("latin1"))
 
-    logger.debug(f"{user.id} отменил оплату {category.name} - {category.price}₽ ({payment.id})")
+    logger.info(f"{user.id} отменил оплату {category.name} - {category.price}₽ ({payment.id} {payment.url})")
 
     await state.finish()
     await categories_callback(call, state, callback_data)
@@ -132,7 +132,7 @@ async def buy_cancel_callback(call: types.CallbackQuery):
 
 @dp.callback_query_handler(buy_callback_data.filter(action="paid"))
 async def buy_paid_callback2(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
-    logger.debug(f"Пользователь {call.message.chat.id} нажал на проверку без стейта")
+    logger.debug(f"{call.message.chat.id} нажал на проверку без стейта")
 
 
 @dp.callback_query_handler(buy_callback_data.filter(action="paid"), state='payment')
@@ -147,7 +147,7 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
     payment: Payment = pickle.loads((await state.get_data()).get("payment").encode("latin1"))
 
     status = payment.status
-    logger.debug(f"{user.id} проверил оплату: {status.name} {category.name} - {category.price}₽ ({payment.id})")
+    logger.info(f"{user.id} проверил оплату: {status.name} {category.name} - {category.price}₽ ({payment.id} {payment.url})")
     is_developer = call.message.chat.id == int(DEVELOPER)
 
     if status != PaymentStatus.PAID and not is_developer:
