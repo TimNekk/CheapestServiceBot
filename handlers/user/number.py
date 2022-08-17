@@ -56,10 +56,10 @@ async def give_number(call: types.CallbackQuery, category_id: int):
     text = f"""
 <b>Успешно!</b>
 <b>Номер:</b> 7{hcode(str(working_number.phone_number)[1:])}
-<b>Время на активацию:</b> 20 минут
+<b>Время на активацию:</b> 60 минут
 
 Вы можете входить в аккаунт, я сразу же отправлю вам код из СМС.
-Новые смс будут приходить в течении 20 минут.
+Новые смс будут приходить в течении 60 минут.
 """
 
     await call.message.delete()
@@ -87,7 +87,7 @@ async def wait_for_code(working_number: Number, call: types.CallbackQuery) -> No
 
     give_time = datetime.utcnow()
     code: Optional[str] = None
-    while give_time + timedelta(minutes=20) > datetime.utcnow():
+    while give_time + timedelta(minutes=60) > datetime.utcnow():
         try:
             code = vak_sms.get_code(working_number.id)
         except NoCode:
