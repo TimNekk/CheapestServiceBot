@@ -1,8 +1,10 @@
 import pickle
+from contextlib import suppress
 from datetime import datetime, timedelta
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.utils.exceptions import InvalidQueryID
 from aiogram.utils.markdown import hcode
 from loguru import logger
 from pypayment import Payment, LavaPayment, PaymentStatus
@@ -83,7 +85,8 @@ async def categories_callback(call: types.CallbackQuery, state: FSMContext, call
 
 @dp.callback_query_handler(category_callback_data.filter())
 async def category_callback(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
-    await call.answer(cache_time=5)
+    with suppress(InvalidQueryID):
+        await call.answer(cache_time=5)
 
     user = db.get_user(call.message.chat.id)
 
