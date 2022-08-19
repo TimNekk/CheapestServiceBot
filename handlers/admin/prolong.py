@@ -1,7 +1,9 @@
 import re
+from contextlib import suppress
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.utils.exceptions import MessageToDeleteNotFound
 
 from data.config import Commands
 from filters import IsAdmin
@@ -36,10 +38,13 @@ async def save_prolong_service(call: types.CallbackQuery, state: FSMContext, cal
 async def cancel_prolong_service(call: types.CallbackQuery, state: FSMContext):
     ask_message_id: int = (await state.get_data()).get("ask_message_id")
     await state.finish()
-    if ask_message_id:
-        await dp.bot.delete_message(call.message.chat.id, ask_message_id)
 
-    await call.message.delete()
+    if ask_message_id:
+        with suppress(MessageToDeleteNotFound):
+            await dp.bot.delete_message(call.message.chat.id, ask_message_id)
+
+    with suppress(MessageToDeleteNotFound):
+        await call.message.delete()
 
 
 @dp.message_handler(IsAdmin(), state='prolong_number')
@@ -54,8 +59,8 @@ async def prolong_number(message: types.Message, state: FSMContext):
     for number in message.text.split("\n"):
         number = re.findall(r'(?:\+|)(7[\d ]{9,}\d)', number)
         if not number:
-            await state.finish()
-            await message.answer("Неверный формат номера")
+            await message.answer("Неверный формат номера",
+                                 reply_markup=prolong_cancel_keyboard())
             return
 
         number = number[0]
@@ -64,7 +69,8 @@ async def prolong_number(message: types.Message, state: FSMContext):
             text += f"\n<code>{number}|{id_num}</code>"
             prolonged_numbers[number] = id_num
         except NoNumber:
-            await message.answer(f"Номер +{number} активен или не существует")
+            await message.answer(f"Номер +{number} активен или не существует",
+                                 reply_markup=prolong_cancel_keyboard())
 
     if not prolonged_numbers:
         return
