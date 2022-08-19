@@ -54,6 +54,7 @@ async def prolong_number(message: types.Message, state: FSMContext):
     for number in message.text.split("\n"):
         number = re.findall(r'(?:\+|)(7[\d ]{9,}\d)', number)
         if not number:
+            await state.finish()
             await message.answer("Неверный формат номера")
             return
 
