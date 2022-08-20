@@ -1,8 +1,10 @@
 import asyncio
+from contextlib import suppress
 from datetime import datetime, timedelta
 from typing import Optional
 
 from aiogram import types
+from aiogram.utils.exceptions import MessageCantBeDeleted
 from aiogram.utils.markdown import hcode
 from loguru import logger
 
@@ -50,7 +52,6 @@ async def give_number(call: types.CallbackQuery, category_id: int):
         await notify_admins(f"<b>Нет номер из категории:</b> {category.service.name} - {category.name}")
         return
 
-    logger.info(f"{user.id} получил номер {working_number.phone_number} ({working_number.id})")
     working_number.set_busy(True)
 
     text = f"""
@@ -62,8 +63,10 @@ async def give_number(call: types.CallbackQuery, category_id: int):
 Новые смс будут приходить в течении 30 минут.
 """
 
-    await call.message.delete()
+    with suppress(MessageCantBeDeleted):
+        await call.message.delete()
     await user.send_message(text)
+    logger.info(f"{user.id} получил номер {working_number.phone_number} ({working_number.id})")
 
     await asyncio.sleep(5)
     text = f"""
