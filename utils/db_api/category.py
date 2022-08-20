@@ -41,7 +41,8 @@ class Category:
         if not_busy:
             sql += ' AND busy = 0'
 
-        return db.execute(sql, parameters=(self.id,), fetchone=True)[0]
+        number = db.execute(sql, parameters=(self.id,), fetchone=True)[0]
+        return number if number > 3 else 0
 
     @property
     def service(self) -> 'Service':

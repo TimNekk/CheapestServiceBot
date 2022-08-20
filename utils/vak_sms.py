@@ -80,6 +80,7 @@ class VakSMSApi:
         if response_json.get("error") == "noNumber":
             raise NoNumber()
 
+        logger.debug(f"VakSMS API prolog response: {response.status_code} {response.text}")
         return response_json.get("idNum")
 
     def set_status(self, id_num: str, status: Status) -> None:
