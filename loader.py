@@ -5,8 +5,9 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from pypayment import LavaPayment, ChargeCommission
+from smsactivate.api import SMSActivateAPI
 
-from data.config import Lava, BOT_TOKEN, VAK_SMS_API_KEY, Redis
+from data.config import Lava, BOT_TOKEN, VAK_SMS_API_KEY, Redis, SMS_ACTIVATE_API_KEY
 from utils import VakSMSApi
 from utils.db_api.database import Database
 
@@ -16,6 +17,7 @@ dp = Dispatcher(bot, storage=storage)
 db = Database()
 
 vak_sms = VakSMSApi(VAK_SMS_API_KEY)
+sms_api = SMSActivateAPI(SMS_ACTIVATE_API_KEY)
 
 LavaPayment.authorize(token=Lava.token,
                       wallet_to=Lava.wallet,
