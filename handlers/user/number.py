@@ -94,7 +94,7 @@ async def wait_for_code(number_id: str, user_id: int, activation_time: datetime,
                 code = re.findall(r"\d+", list(sms_s.values())[0].get("text"))[0]
             except IndexError:
                 logger.error(f"Index Error for {sms_s}")
-                await asyncio.sleep(3)
+                await asyncio.sleep(5)
                 continue
 
             text = f"""
@@ -106,6 +106,7 @@ async def wait_for_code(number_id: str, user_id: int, activation_time: datetime,
             await user.send_message(text, reply_markup=resend_keyboard(number_id, activation_time.timestamp(), sms_count))
             logger.info(f"{user.id} получил код {code} от {number.phone_number} ({number.id})")
             return
+        await asyncio.sleep(5)
 
 
 @dp.callback_query_handler(resend_callback_data.filter())
