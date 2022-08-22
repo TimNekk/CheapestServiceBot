@@ -1,4 +1,5 @@
 import asyncio
+import re
 from contextlib import suppress
 from datetime import datetime, timedelta
 from typing import Optional
@@ -11,7 +12,7 @@ from loguru import logger
 from data.config import ADMIN_NICKNAME
 from keyboards.inline import resend_keyboard, resend_callback_data
 from keyboards.inline.admin import delete_number_keyboard
-from loader import db, vak_sms, dp
+from loader import db, vak_sms, dp, sms_api
 from utils.db_api.number import Number
 from utils.notify_admins import notify_admins
 from utils.vak_sms import IdNumNotFound, NoCode, Status, NoNumber
@@ -24,24 +25,13 @@ async def give_number(call: types.CallbackQuery, category_id: int):
 
     working_number: Optional[Number] = None
     for number in numbers:
-        try:
-            vak_sms.get_code(number.id)
-        except IdNumNotFound:
-            continue
-        except NoCode:
+        response = sms_api.getRentStatus(number.id)
+        status = response.get('status')
+        print(response)
+
+        if status == "success" or (status == "error" and response.get('message') == "STATUS_WAIT_CODE"):
             working_number = number
             break
-
-        working_number = number
-
-    if not working_number:
-        for number in numbers:
-            try:
-                working_number = number.prolong()
-                break
-            except NoNumber:
-                await notify_admins(f"Номер {number.phone_number} не работает",
-                                    reply_markup=delete_number_keyboard(number.id))
 
     if not working_number:
         text = f"""
@@ -83,7 +73,8 @@ async def give_number(call: types.CallbackQuery, category_id: int):
     await user.send_message(text)
 
     activation_time = datetime.utcnow() + timedelta(minutes=60)
-    await wait_for_code(working_number.id, user.id, activation_time)
+    sms_count = len(response.get('values'))
+    await wait_for_code(working_number.id, user.id, activation_time, sms_count)
 
     await asyncio.sleep((activation_time - datetime.utcnow()).total_seconds())
 
@@ -91,28 +82,30 @@ async def give_number(call: types.CallbackQuery, category_id: int):
     working_number.delete()
 
 
-async def wait_for_code(number_id: str, user_id: int, activation_time: datetime) -> None:
+async def wait_for_code(number_id: str, user_id: int, activation_time: datetime, sms_count: int) -> None:
     user = db.get_user(user_id)
     number = db.get_number(number_id)
     vak_sms.set_status(number.id, Status.RESEND)
 
     while activation_time > datetime.utcnow():
-        try:
-            code = vak_sms.get_code(number.id)
-        except NoCode:
-            await asyncio.sleep(5)
-            continue
-        except IdNumNotFound:
-            number.prolong()
-            continue
+        sms_s = sms_api.getRentStatus(number.id).get('values')
+        if len(sms_s) > sms_count and len(sms_s) > 0:
+            try:
+                code = re.findall(r"\d+", list(sms_s.values())[0].get("text"))[0]
+            except IndexError:
+                logger.error(f"Index Error for {sms_s}")
+                await asyncio.sleep(3)
+                continue
 
-        text = f"""
+            text = f"""
 <b>Номер:</b> 7{hcode(str(number.phone_number)[1:])}
 <b>Код из СМС:</b> {hcode(code)}
 """
-        await user.send_message(text, reply_markup=resend_keyboard(number_id, activation_time.timestamp()))
-        logger.info(f"{user.id} получил код {code} от {number.phone_number} ({number.id})")
-        return
+
+            sms_count = len(sms_s)
+            await user.send_message(text, reply_markup=resend_keyboard(number_id, activation_time.timestamp(), sms_count))
+            logger.info(f"{user.id} получил код {code} от {number.phone_number} ({number.id})")
+            return
 
 
 @dp.callback_query_handler(resend_callback_data.filter())
@@ -122,10 +115,11 @@ async def resend_code(call: types.CallbackQuery, callback_data: dict):
 
     number_id = callback_data.get("number_id")
     activation_time = datetime.fromtimestamp(float(callback_data.get("activation_time_timestamp")))
+    sms_count = int(callback_data.get("sms_count"))
 
     if activation_time < datetime.utcnow():
         with suppress(Exception):
             await call.message.edit_text("Время на активацию истекло")
         return
 
-    await wait_for_code(number_id, call.message.chat.id, activation_time)
+    await wait_for_code(number_id, call.message.chat.id, activation_time, sms_count)
