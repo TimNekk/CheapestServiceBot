@@ -1,10 +1,11 @@
+from contextlib import suppress
 from typing import Callable, Awaitable, Dict, Any, Optional
 
 from aiogram import Dispatcher
 from aiogram.dispatcher.handler import current_handler, CancelHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
-from aiogram.utils.exceptions import RetryAfter, ChatNotFound
+from aiogram.utils.exceptions import RetryAfter, ChatNotFound, InvalidQueryID
 from loguru import logger
 
 from data.config import Subscription
@@ -32,7 +33,8 @@ class SubscriptionMiddleware(BaseMiddleware):
 
             try:
                 if message.reply_markup == subscribe_keyboard():
-                    await call.answer(text)
+                    with suppress(InvalidQueryID):
+                        await call.answer(text)
                     raise CancelHandler()
 
                 await message.answer(text, reply_markup=subscribe_keyboard())
