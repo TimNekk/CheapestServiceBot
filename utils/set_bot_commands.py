@@ -17,7 +17,7 @@ async def set_default_commands(dp):
 
     admin_commands = [
         types.BotCommand(Commands.Admin.settings.command, Commands.Admin.settings.description),
-        types.BotCommand(Commands.Admin.prolong.command, Commands.Admin.prolong.description),
+        # types.BotCommand(Commands.Admin.prolong.command, Commands.Admin.prolong.description),
         types.BotCommand(Commands.Admin.send.command, Commands.Admin.send.description),
         types.BotCommand(Commands.Admin.stats.command, Commands.Admin.stats.description),
     ]
