@@ -59,12 +59,12 @@ async def categories_callback(call: types.CallbackQuery, state: FSMContext, call
 
     if category.id == 17:
         text = f"""
-<b>Для покупки номера с 350 баллами:</b>
+<b>Покупка аккаунта с 350 бонусами(временная мера на 1 день):</b>
 
 1) Перейдите в @CheapestService350Bot
 2) Нажмите на кнопку "Купить"
-3) Выберите Urent -> 350 бонусов
-4) После оплаты вы получите номер
+3) Выберите Urent -> 350 бонусов 
+4) Оплачиваете и получаете номер и код в боте как раньше
 """
         await user.edit_message_text(call.message.message_id, text)
         return
