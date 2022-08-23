@@ -57,6 +57,17 @@ async def categories_callback(call: types.CallbackQuery, state: FSMContext, call
     category_id: int = callback_data.get("category_id")
     category = db.get_category(category_id)
 
+    if category.id == 17:
+        text = f"""
+<b>Для покупки номера с 350 баллами:</b>
+1) Перейдите в @CheapestService350Bot
+2) Нажмите на кнопку "Купить"
+3) Выберите Urent -> 350 бонусов
+4) После оплаты вы получите номер
+"""
+        await user.edit_message_text(call.message.message_id, text)
+        return
+
     if category.get_number_count() == 0:
         text = "Товар закончился"
         await call.answer(text, cache_time=3)

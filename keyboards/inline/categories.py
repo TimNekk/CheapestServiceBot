@@ -25,6 +25,8 @@ def categories_keyboard(service_id: int) -> InlineKeyboardMarkup:
 
     for category in categories:
         text = f"{category.name} | {category.price} ₽ | {category.get_number_count()} шт."
+        if category.id == 17:
+            text = f"{category.name} | {category.price} ₽ | В наличии"
         keyboard.add(InlineKeyboardButton(text=text, callback_data=make_categories_callback_data(category.id)))
 
     keyboard.add(InlineKeyboardButton(text="« Назад", callback_data=make_services_select_callback_data()))
