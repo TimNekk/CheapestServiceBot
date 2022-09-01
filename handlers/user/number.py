@@ -97,10 +97,11 @@ async def wait_for_code(number_id: str, user_id: int, activation_time: datetime)
     vak_sms.set_status(number.id, Status.RESEND)
 
     while activation_time > datetime.utcnow():
+        await asyncio.sleep(5)
+
         try:
             code = vak_sms.get_code(number.id)
         except NoCode:
-            await asyncio.sleep(5)
             continue
         except IdNumNotFound:
             number.prolong()
