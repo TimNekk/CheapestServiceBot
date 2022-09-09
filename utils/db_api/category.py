@@ -42,7 +42,7 @@ class Category:
             sql += ' AND busy = 0'
 
         number = db.execute(sql, parameters=(self.id,), fetchone=True)[0]
-        return number if number > 3 else 0
+        return number
 
     @property
     def service(self) -> 'Service':
