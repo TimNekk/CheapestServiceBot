@@ -47,10 +47,10 @@ async def give_number(call: types.CallbackQuery, category_id: int):
     text = f"""
 <b>Успешно!</b>
 <b>Номер:</b> 7{hcode(str(working_number.phone_number)[1:])}
-<b>Время на активацию:</b> 60 минут
+<b>Время на активацию:</b> 30 минут
 
 Вы можете входить в аккаунт, я сразу же отправлю вам код из СМС.
-Новые смс можно будет получать в течении 60 минут.
+Новые смс можно будет получать в течении 30 минут.
 """
 
     with suppress(MessageCantBeDeleted):
@@ -72,7 +72,7 @@ async def give_number(call: types.CallbackQuery, category_id: int):
 """
     await user.send_message(text)
 
-    activation_time = datetime.utcnow() + timedelta(minutes=60)
+    activation_time = datetime.utcnow() + timedelta(minutes=30)
     sms_count = len(response.get('values'))
     await wait_for_code(working_number.id, user.id, activation_time, sms_count)
 
