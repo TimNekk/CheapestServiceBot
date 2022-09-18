@@ -173,8 +173,7 @@ async def buy_paid_callback(call: types.CallbackQuery, state: FSMContext, callba
 <b>ID платежа:</b> {hcode(payment.id)}
 """
 
-    from random import randrange
-    if not is_developer and randrange(100) < 30:
+    if not is_developer:
         await notify_admins(text)
 
     await give_number(call, category.id)
