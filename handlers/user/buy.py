@@ -7,7 +7,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.utils.exceptions import InvalidQueryID
 from aiogram.utils.markdown import hcode
 from loguru import logger
-from pypayment import Payment, LavaPayment, PaymentStatus
+from pypayment import Payment, LavaPayment, PaymentStatus, QiwiPayment
 
 from data.config import ADMIN_NICKNAME, DEVELOPER
 from filters import IsBuyCommand, IsInDB
@@ -92,7 +92,7 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
 
     category_id: int = callback_data.get("category_id")
     category = db.get_category(category_id)
-    payment: Payment = LavaPayment(category.price, description=category.name)
+    payment: Payment = QiwiPayment(category.price, description=category.name)
     decoded_payment = pickle.dumps(payment).decode("latin1")
 
     text = f"""
