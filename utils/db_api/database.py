@@ -26,6 +26,7 @@ class Database:
                 fetchall=False, commit=False):
 
         connection = self.connection
+        connection.execute("PRAGMA foreign_keys = ON")
         connection.set_trace_callback(self.log)
         cursor = connection.cursor()
 
