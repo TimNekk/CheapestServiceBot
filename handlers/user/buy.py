@@ -92,7 +92,7 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
 
     category_id: int = callback_data.get("category_id")
     category = db.get_category(category_id)
-    payment: Payment = QiwiPayment(category.price, description=category.name)
+    payment: Payment = LavaPayment(category.price, description=category.name)
     decoded_payment = pickle.dumps(payment).decode("latin1")
 
     text = f"""

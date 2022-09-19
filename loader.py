@@ -19,11 +19,11 @@ db = Database()
 vak_sms = VakSMSApi(VAK_SMS_API_KEY)
 sms_api = SMSActivateAPI(SMS_ACTIVATE_API_KEY)
 
-# LavaPayment.authorize(token=Lava.token,
-#                       wallet_to=Lava.wallet,
-#                       expiration_duration=timedelta(hours=1),
-#                       success_url=f"https://t.me/CheapestServiceBot",
-#                       charge_commission=ChargeCommission.FROM_CUSTOMER)
+LavaPayment.authorize(token=Lava.token,
+                      wallet_to=Lava.wallet,
+                      expiration_duration=timedelta(hours=1),
+                      success_url=f"https://t.me/CheapestServiceBot",
+                      charge_commission=ChargeCommission.FROM_CUSTOMER)
 
 QiwiPayment.authorize(secret_key=Qiwi.secret_key,
                       theme_code=Qiwi.theme_code)
