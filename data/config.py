@@ -30,6 +30,12 @@ class Lava:
 
 
 @dataclass
+class YooMoney:
+    client_id: str = env.str("yoomoney_client_id")
+    token: str = env.str("yoomoney_token")
+
+
+@dataclass
 class Redis:
     host: str = env.str("REDIS_HOST")
     port: int = env.int("REDIS_PORT")

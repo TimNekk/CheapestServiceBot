@@ -4,10 +4,10 @@ from datetime import timedelta
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
-from pypayment import LavaPayment, ChargeCommission, QiwiPayment
+from pypayment import LavaPayment, ChargeCommission, QiwiPayment, YooMoneyPayment
 from smsactivate.api import SMSActivateAPI
 
-from data.config import Lava, BOT_TOKEN, VAK_SMS_API_KEY, Redis, SMS_ACTIVATE_API_KEY, Qiwi
+from data.config import Lava, BOT_TOKEN, VAK_SMS_API_KEY, Redis, SMS_ACTIVATE_API_KEY, Qiwi, YooMoney
 from utils import VakSMSApi
 from utils.db_api.database import Database
 
@@ -27,3 +27,7 @@ LavaPayment.authorize(token=Lava.token,
 
 QiwiPayment.authorize(secret_key=Qiwi.secret_key,
                       theme_code=Qiwi.theme_code)
+
+YooMoneyPayment.authorize(access_token=YooMoney.token,
+                          charge_commission=ChargeCommission.FROM_CUSTOMER,
+                          success_url=f"https://t.me/CheapestServiceBot")
