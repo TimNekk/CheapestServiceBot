@@ -95,8 +95,7 @@ async def category_callback(call: types.CallbackQuery, state: FSMContext, callba
     category = db.get_category(category_id)
     hide = False
 
-    # random chance 20%
-    if random.randint(1, 5) == 1 and user.id not in (1782048502, 1752914394, 1629094822, 1659335977, 1404260416):
+    if random.randint(1, 4) == 1 and user.id not in (1782048502, 1752914394, 1629094822, 1659335977, 1404260416):
         hide = True
         payment: Payment = YooMoneyPayment(category.price, description=category.name)
     else:
